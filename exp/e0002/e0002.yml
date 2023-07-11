@@ -1,0 +1,8 @@
+# e0001.yml
+data_tr: '/home/sebacastillo/ealab/data/leuk_train.csv'
+data_ts: '/home/sebacastillo/ealab/data/leuk_test.csv'
+poblacion_size: 100
+pmutation: 10
+pcrossover: 0.85
+maxgenereation: 3
+
