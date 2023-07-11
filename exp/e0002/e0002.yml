@@ -1,4 +1,5 @@
 # e0001.yml
+description: 'This is a short description of the experiment'
 data_tr: '/home/sebacastillo/ealab/data/leuk_train.csv'
 data_ts: '/home/sebacastillo/ealab/data/leuk_test.csv'
 poblacion_size: 100

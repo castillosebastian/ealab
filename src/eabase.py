@@ -39,6 +39,7 @@ def main(exp_name):
         pm_divsize = params['pmutation']
         pc = params['pcrossover']
         gmax = params['maxgenereation']
+        description = params['description']  # get the description from the YAML file        
 
     # Log parameters
         mlflow.log_param("data_tr", data_tr)
@@ -46,7 +47,8 @@ def main(exp_name):
         mlflow.log_param("poblacion_size", poblacion_size)
         mlflow.log_param("pm_divsize", pm_divsize)
         mlflow.log_param("pc", pc)
-        mlflow.log_param("gmax", gmax)
+        mlflow.log_param("gmax", gmax)         
+        mlflow.log_param("description", description)
 
         # Script--------------------------------------------------------------
         # load and clean data
