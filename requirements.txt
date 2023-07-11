@@ -1,0 +1,13 @@
+pandas
+numpy
+polars
+black
+torch
+ipykernel
+ipywidgets
+pathlib
+seaborn
+dill
+optuna
+deap
+pandas-datareader
