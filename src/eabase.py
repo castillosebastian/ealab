@@ -324,10 +324,6 @@ def main(exp_name):
             # Log the figure as an artifact in MLflow
             mlflow.log_artifact(temp.name, "genes_plots.png")
 
-
-
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run experiment with given name')
     parser.add_argument('exp_name', type=str, help='The name of the experiment to run')
