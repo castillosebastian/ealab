@@ -11,3 +11,6 @@ dill
 optuna
 deap
 pandas-datareader
+scikit-learn
+mlflow
+pyyaml
