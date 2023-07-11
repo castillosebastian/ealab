@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import argparse
 import os
+import matplotlib.pyplot as plt
+import tempfile
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
@@ -260,47 +262,72 @@ def main(exp_name):
                 print('FITNES: ', records['fitness'])
                 print('ACC: ', records['acc'])
                 print('GENES: ', records['ngenes'])
-   
-'''
-f_avg = logbook.chapters['fitness'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
-f_max = logbook.chapters['fitness'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
-f_min = logbook.chapters['fitness'].select('min')  # Extraemos fitness mínimo a lo largo de las épocas
 
-N = 30 if GMAX > 200 else GMAX 
-fig, ax = plt.subplots(1, 1, figsize=(20,6)) 
-ax.plot(range(N), f_avg[:N], '-or')
-ax.plot(range(N), f_max[:N], '-og')
-ax.plot(range(N), f_min[:N], '-ob')
-ax.set_xlabel('Generaciones', fontsize=16)
-ax.set_ylabel('Fitness', fontsize=16)
-ax.grid(True)
+        # Log metrics to MLflow
+        mlflow.log_metric("final_max_fitness", records['fitness']['max'])
+        mlflow.log_metric("final_avg_fitness", records['fitness']['avg'])
+        mlflow.log_metric("final_max_acc", records['acc']['max'])
+        mlflow.log_metric("final_avg_acc", records['acc']['avg'])
+        mlflow.log_metric("final_genes", records['ngenes']['max'])
 
-f_avg = logbook.chapters['acc'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
-f_max = logbook.chapters['acc'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
-f_min = logbook.chapters['acc'].select('min')  # Extraemos fitness mínimo (elite) a lo largo de las épocas
+        f_avg = logbook.chapters['fitness'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
+        f_max = logbook.chapters['fitness'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
+        f_min = logbook.chapters['fitness'].select('min')  # Extraemos fitness mínimo a lo largo de las épocas
 
-N = 30 if GMAX > 200 else GMAX 
-fig, ax = plt.subplots(1, 1, figsize=(20,6)) 
-ax.plot(range(N), f_avg[:N], '-or')
-ax.plot(range(N), f_max[:N], '-og')
-ax.plot(range(N), f_min[:N], '-ob')
-ax.set_xlabel('Generaciones', fontsize=16)
-ax.set_ylabel('Accuracy', fontsize=16)
-ax.grid(True)
+        N = 30 if GMAX > 200 else GMAX 
+        fig, ax = plt.subplots(1, 1, figsize=(20,6)) 
+        ax.plot(range(N), f_avg[:N], '-or')
+        ax.plot(range(N), f_max[:N], '-og')
+        ax.plot(range(N), f_min[:N], '-ob')
+        ax.set_xlabel('Generaciones', fontsize=16)
+        ax.set_ylabel('Fitness', fontsize=16)
+        ax.grid(True)
 
-ngenes_avg = logbook.chapters['ngenes'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
-ngenes_max = logbook.chapters['ngenes'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
-ngenes_min = logbook.chapters['ngenes'].select('min')  # Extraemos fitness mínimo (elite) a lo largo de las épocas
+        with tempfile.NamedTemporaryFile(suffix=".png") as temp:
+            fig.savefig(temp.name)
+            # Log the figure as an artifact in MLflow
+            mlflow.log_artifact(temp.name, "fitness_plots.png")
 
-N = 100 if GMAX > 2000 else GMAX 
-fig, ax = plt.subplots(1, 1, figsize=(20,6)) 
-ax.plot(range(N), ngenes_avg[:N], '-or')
-ax.plot(range(N), ngenes_max[:N], '-og')
-ax.plot(range(N), ngenes_min[:N], '-ob')
-ax.set_xlabel('Generaciones', fontsize=16)
-ax.set_ylabel('Número de genes', fontsize=16)
-ax.grid(True)
-'''
+        f_avg = logbook.chapters['acc'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
+        f_max = logbook.chapters['acc'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
+        f_min = logbook.chapters['acc'].select('min')  # Extraemos fitness mínimo (elite) a lo largo de las épocas
+
+        N = 30 if GMAX > 200 else GMAX 
+        fig, ax = plt.subplots(1, 1, figsize=(20,6)) 
+        ax.plot(range(N), f_avg[:N], '-or')
+        ax.plot(range(N), f_max[:N], '-og')
+        ax.plot(range(N), f_min[:N], '-ob')
+        ax.set_xlabel('Generaciones', fontsize=16)
+        ax.set_ylabel('Accuracy', fontsize=16)
+        ax.grid(True)
+
+        with tempfile.NamedTemporaryFile(suffix=".png") as temp:
+            fig.savefig(temp.name)
+            # Log the figure as an artifact in MLflow
+            mlflow.log_artifact(temp.name, "accuracy_plots.png")
+
+        ngenes_avg = logbook.chapters['ngenes'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
+        ngenes_max = logbook.chapters['ngenes'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
+        ngenes_min = logbook.chapters['ngenes'].select('min')  # Extraemos fitness mínimo (elite) a lo largo de las épocas
+
+        N = 100 if GMAX > 2000 else GMAX 
+        fig, ax = plt.subplots(1, 1, figsize=(20,6)) 
+        ax.plot(range(N), ngenes_avg[:N], '-or')
+        ax.plot(range(N), ngenes_max[:N], '-og')
+        ax.plot(range(N), ngenes_min[:N], '-ob')
+        ax.set_xlabel('Generaciones', fontsize=16)
+        ax.set_ylabel('Número de genes', fontsize=16)
+        ax.grid(True)   
+
+        with tempfile.NamedTemporaryFile(suffix=".png") as temp:
+            fig.savefig(temp.name)
+            # Log the figure as an artifact in MLflow
+            mlflow.log_artifact(temp.name, "genes_plots.png")
+
+
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run experiment with given name')
     parser.add_argument('exp_name', type=str, help='The name of the experiment to run')

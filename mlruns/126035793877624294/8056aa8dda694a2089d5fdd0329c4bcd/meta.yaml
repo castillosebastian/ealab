@@ -1,0 +1,15 @@
+artifact_uri: file:///home/sebacastillo/ealab/mlruns/126035793877624294/8056aa8dda694a2089d5fdd0329c4bcd/artifacts
+end_time: 1689107292231
+entry_point_name: ''
+experiment_id: '126035793877624294'
+lifecycle_stage: active
+run_id: 8056aa8dda694a2089d5fdd0329c4bcd
+run_name: e0002
+run_uuid: 8056aa8dda694a2089d5fdd0329c4bcd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1689107231263
+status: 4
+tags: []
+user_id: sebacastillo
