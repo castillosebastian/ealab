@@ -261,9 +261,13 @@ def main(exp_name):
             mlflow.log_metric("evol_elite_fitness", elite.fitness.values[0], step=g)
             mlflow.log_metric("evol_elite_acc", elite.acc, step=g)
             mlflow.log_metric("evol_elite_ngenes", np.sum(elite), step=g)            
-            mlflow.log_metric("evol_generation_avg_fitness", records['fitness']['avg'], step=g)
-            mlflow.log_metric("evol_generation_avg_acc", records['acc']['avg'], step=g)
-            mlflow.log_metric("evol_generation_avg_genes", records['ngenes']['avg'], step=g)            
+            mlflow.log_metric("evol_pop_fitness_avg", records['fitness']['avg'], step=g)
+            mlflow.log_metric("evol_pop_acc_avg", records['acc']['avg'], step=g)
+            mlflow.log_metric("evol_pop_genes_avg", records['ngenes']['avg'], step=g) 
+            # Check std
+            mlflow.log_metric("evol_pop_fitness_std", records['fitness']['std'], step=g)
+            mlflow.log_metric("evol_pop_acc_std", records['acc']['std'], step=g)
+            mlflow.log_metric("evol_pop_genes_std", records['ngenes']['std'], step=g)        
             
             if (g%1 == 0):
                 print('='*79)
