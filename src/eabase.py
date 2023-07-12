@@ -257,6 +257,14 @@ def main(exp_name):
             records = mstats.compile(pop)
             logbook.record(gen=g, **records)
 
+            # Log metrics for this generation            
+            mlflow.log_metric("evol_elite_fitness", elite.fitness.values[0], step=g)
+            mlflow.log_metric("evol_elite_acc", elite.acc, step=g)
+            mlflow.log_metric("evol_elite_ngenes", np.sum(elite), step=g)            
+            mlflow.log_metric("evol_generation_avg_fitness", records['fitness']['avg'], step=g)
+            mlflow.log_metric("evol_generation_avg_acc", records['acc']['avg'], step=g)
+            mlflow.log_metric("evol_generation_avg_genes", records['ngenes']['avg'], step=g)            
+            
             if (g%1 == 0):
                 print('='*79)
                 print(f'GENERATION: {g}')
@@ -265,12 +273,12 @@ def main(exp_name):
                 print('ACC: ', records['acc'])
                 print('GENES: ', records['ngenes'])
 
-        # Log metrics to MLflow
+        # Log metrics for all the evolution        
         mlflow.log_metric("final_max_fitness", records['fitness']['max'])
         mlflow.log_metric("final_avg_fitness", records['fitness']['avg'])
         mlflow.log_metric("final_max_acc", records['acc']['max'])
         mlflow.log_metric("final_avg_acc", records['acc']['avg'])
-        mlflow.log_metric("final_genes", records['ngenes']['max'])
+        mlflow.log_metric("final_genes", records['ngenes']['max'])        
 
         f_avg = logbook.chapters['fitness'].select('avg')  # Extraemos fitness promedio a lo largo de las épocas
         f_max = logbook.chapters['fitness'].select('max')  # Extraemos fitness máximo a lo largo de las épocas
