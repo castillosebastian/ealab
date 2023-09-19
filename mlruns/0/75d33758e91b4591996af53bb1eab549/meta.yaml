@@ -1,8 +1,9 @@
 artifact_uri: file:///home/sebacastillo/ealab/mlruns/0/75d33758e91b4591996af53bb1eab549/artifacts
+deleted_time: 1695136543531
 end_time: 1689105332044
 entry_point_name: ''
 experiment_id: '0'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: 75d33758e91b4591996af53bb1eab549
 run_name: e0001
 run_uuid: 75d33758e91b4591996af53bb1eab549
