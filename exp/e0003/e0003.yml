@@ -1,0 +1,11 @@
+# e0001.yml
+description: 'Primer experimento exploratorio'
+data_tr: 'leukemia_train_38x7129.arff'
+data_ts: 'leukemia_test_34x7129.arff'
+classname1: 'ALL'
+pop_size: 100
+pmutation: 20
+pcrossover: 0.85
+tournsize: 5
+maxgenereation: 10
+

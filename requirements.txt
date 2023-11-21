@@ -12,5 +12,6 @@ optuna
 deap
 pandas-datareader
 scikit-learn
+skorch
 mlflow
 pyyaml

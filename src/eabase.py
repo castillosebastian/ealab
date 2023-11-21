@@ -17,7 +17,7 @@ from deap import creator  # Permite crear los componentes de nuestro algoritmo
 from deap import tools  # Contiene funciones precargadas
 
 from joblib import Parallel, delayed
-from utils import bin, mutation, load_params, fitness
+from utils import *
 
 import mlflow
 
@@ -35,48 +35,38 @@ def main(exp_name):
         # Now you can access your parameters as follows:
         data_tr = params['data_tr']
         data_ts = params['data_ts']
-        poblacion_size = params['poblacion_size']
+        classname1 = params['classname1']
+        pop_size = params['pop_size']
         pm_divsize = params['pmutation']
         pc = params['pcrossover']
         gmax = params['maxgenereation']
-        description = params['description']  # get the description from the YAML file        
+        description = params['description']  # get the description from the YAML file  
+        tournsize = params['tournsize']  
 
     # Log parameters
         mlflow.log_param("data_tr", data_tr)
         mlflow.log_param("data_ts", data_ts)
-        mlflow.log_param("poblacion_size", poblacion_size)
+        mlflow.log_param("pop_size", pop_size)
         mlflow.log_param("pm_divsize", pm_divsize)
+        mlflow.log_param("tournsize", tournsize)
         mlflow.log_param("pc", pc)
         mlflow.log_param("gmax", gmax)         
         mlflow.log_param("description", description)
 
         # Script--------------------------------------------------------------
-        # load and clean data
-        TRAIN = pd.read_csv(data_tr, header=None)
-        TEST = pd.read_csv(data_ts, header=None)
-        scaler = StandardScaler()
-        TRAIN = TRAIN.to_numpy()
-        TEST = TEST.to_numpy()
-        X_TRAIN = TRAIN[:,:-1]
-        #y_train = (TRAIN[:,-1] + 1) /2
-        y_train = TRAIN[:,-1]
-        y_train = np.where(np.array(y_train) == 2, 1, 0).astype('int64')
-        X_TEST = TEST[:,:-1]
-        y_test = TEST[:,-1]
-        y_test = np.where(np.array(y_test) == 2, 1, 0).astype('int64')
-        scaler.fit(X_TRAIN)
-        Xtrain = scaler.transform(X_TRAIN)
-        Xtest = scaler.transform(X_TEST)
-
-
+        # load data        
+        TRAIN, TEST = load_data(data_tr,data_ts)
+        
+        # Prepare and scale data   
+        X_train, y_train, X_test, y_test = process_data(TRAIN, TEST, classname1, True)
+            
         # Cromosoma -----------------------------------------------------------------------------------
-        IND_SIZE = Xtrain.shape[1]  # Cantidad de genes en el cromosoma
-        POP_SIZE = poblacion_size # Cantidad de individuos en la población
+        IND_SIZE = X_train.shape[1]  # Cantidad de genes en el cromosoma
+        POP_SIZE = pop_size # Cantidad de individuos en la población
         PM = pm_divsize/IND_SIZE  # Probabilidad de mutación [aproximadamente 1 gen por cromosoma]
         PX = pc  # Probabilidad de cruza
         GMAX = gmax  # Cantidad máxima de generaciones que se ejecutará el algoritmo
 
-        
         # CREAMOS LA FUNCION DE FITNESS
         # Esta función tiene "1 OBJETIVO" a "MAXIMIZAR"
         creator.create("Fitness",  # Nombre con el que se registra el componente
@@ -91,7 +81,6 @@ def main(exp_name):
                     ngenes=0)  # Asignamos un método para evaluar el fitness del individuo
 
         ### REGISTRAMOS COMPONENTES
-
         toolbox = base.Toolbox()
         #---------------------
         # DEFINIMOS COMO CONSTRUIR UN GEN
@@ -130,7 +119,7 @@ def main(exp_name):
         # DEFINIMOS COMO REALIZAR LA SELECCION DE INDIVIDUOS
         toolbox.register("select",  # Nombre con el que se registra el componente
                         tools.selTournament,  # Método usado para selección [selRoulette | selTournament | ...]
-                        tournsize=5)  # Parámetro que usa el torneo
+                        tournsize=tournsize)  # Parámetro que usa el torneo
 
         #------------------------------------------------------
         # Stats metrics
@@ -166,10 +155,10 @@ def main(exp_name):
         #================================================
         # EVALUAMOS EL FITNESS DE LA POBLACION
         #======================================
-        print('Evaluamos fitness de la población')
+        print(f'Evaluamos fitness de la población. Pop={len(pop)}')
 
         #fitnesses = list(map(toolbox.evaluate, pop))
-        fitnesses = Parallel(n_jobs=4, backend='multiprocessing')(delayed(fitness)(ind, Xtrain, Xtest, y_train, y_test) for ind in pop)
+        fitnesses = Parallel(n_jobs=4, backend='multiprocessing')(delayed(fitness)(ind, X_train, X_test, y_train, y_test) for ind in pop)
         #================================================
         # ASIGNAMOS A CADA INDIVIDUO SU FITNESS
         #========================================
@@ -186,7 +175,7 @@ def main(exp_name):
         ################################
         print("Comenzamos la evolución")
 
-        for g in range(1,GMAX):#tqdm(range(GMAX)):
+        for g in range(1,GMAX): #tqdm(range(GMAX)):
 
             #================================================
             # SELECCIONAMOS INDIVIDUO ELITE
@@ -237,7 +226,7 @@ def main(exp_name):
             #======================================
             offspring[0] = elite
             
-            fitnesses = Parallel(n_jobs=4, backend='multiprocessing')(delayed(fitness)(ind, Xtrain, Xtest, y_train, y_test) for ind in offspring)
+            fitnesses = Parallel(n_jobs=4, backend='multiprocessing')(delayed(fitness)(ind, X_train, X_test, y_train, y_test) for ind in offspring)
 
             for ind, fit in zip(offspring, fitnesses):
                 ind.fitness.values = (fit[0],)  # Guardamos el fitness para cada individuo (en el individuo)
