@@ -10,3 +10,6 @@ Experiment definition
 
 Results overview:    
 - `mlflow server`  
+
+TODO:
+- fix BO hyperparameters search: `BO_madelon.ipnb``
