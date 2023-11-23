@@ -1,3 +1,10 @@
+# This script is adapted from
+# Frank Ceballos
+# https://towardsdatascience.com/model-design-and-selection-with-scikit-learn-18a29041d02a
+
+# Because my main objective is to process this data in the cloud 
+# I have refactored some objects and added functions for ploting and saving results. I
+# also add error handler in order to don't stop the excecution.
 
 ###############################################################################
 #                          1. Importing Libraries                             #
@@ -9,7 +16,6 @@ import pandas as pd
 import polars as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_classification
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 from sklearn.preprocessing import StandardScaler
@@ -105,148 +111,136 @@ print('Classifiers completed')
 ###############################################################################
 #                             5. Hyper-parameters                             #
 ###############################################################################
-# Initiate parameter grid
-parameters = {}
-
-# Update dict with LDA
-parameters.update({"LDA": {"classifier__solver": ["svd"], 
-                                         }})
-
-# Update dict with QDA
-parameters.update({"QDA": {"classifier__reg_param":[0.01*ii for ii in range(0, 101)], 
-                                         }})
-# Update dict with AdaBoost
-parameters.update({"AdaBoost": { 
-                                "classifier__estimator": [DecisionTreeClassifier(max_depth = ii) for ii in range(1,6)],
-                                "classifier__n_estimators": [200],
-                                "classifier__learning_rate": [0.001, 0.01, 0.05, 0.1, 0.25, 0.50, 0.75, 1.0]
-                                 }})
-
-# Update dict with Bagging
-parameters.update({"Bagging": { 
-                                "classifier__estimator": [DecisionTreeClassifier(max_depth = ii) for ii in range(1,6)],
-                                "classifier__n_estimators": [200],
-                                "classifier__max_features": [0.2, 0.4, 0.6, 0.8, 0.9, 1.0],
-                                "classifier__n_jobs": [-1]
-                                }})
-
-# Update dict with Gradient Boosting
-parameters.update({"Gradient Boosting": { 
-                                        "classifier__learning_rate":[0.15,0.1,0.01,0.001], 
-                                        "classifier__n_estimators": [200],
-                                        "classifier__max_depth": [2,3,4,5,6],
-                                        "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-                                        "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                                        "classifier__max_features": [ "sqrt", "log2"],
-                                        "classifier__subsample": [0.8, 0.9, 1]
-                                         }})
-
-
-# Update dict with Extra Trees
-parameters.update({"Extra Trees Ensemble": { 
-                                            "classifier__n_estimators": [200],
-                                            "classifier__class_weight": [None, "balanced"],
-                                            "classifier__max_features": [ "sqrt", "log2"],
-                                            "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
-                                            "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-                                            "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                                            "classifier__criterion" :["gini", "entropy"]     ,
-                                            "classifier__n_jobs": [-1]
-                                             }})
-
-
-# Update dict with Random Forest Parameters
-parameters.update({"Random Forest": { 
-                                    "classifier__n_estimators": [200],
-                                    "classifier__class_weight": [None, "balanced"],
-                                    "classifier__max_features": [ "sqrt", "log2"],
-                                    "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
-                                    "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-                                    "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                                    "classifier__criterion" :["gini", "entropy"]     ,
-                                    "classifier__n_jobs": [-1]
-                                     }})
-
-# Update dict with Ridge
-parameters.update({"Ridge": { 
-                            "classifier__alpha": [1e-7, 1e-5, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
-                             }})
-
-# Update dict with SGD Classifier
-parameters.update({"SGD": { 
-                            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0],
-                            "classifier__penalty": ["l1", "l2"],
-                            "classifier__n_jobs": [-1]
-                             }})
-
-
-# Update dict with BernoulliNB Classifier
-parameters.update({"BNB": { 
-                            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
-                             }})
-
-# Update dict with GaussianNB Classifier
-parameters.update({"GNB": { 
-                            "classifier__var_smoothing": [1e-9, 1e-8,1e-7, 1e-6, 1e-5]
-                             }})
-
-# Update dict with K Nearest Neighbors Classifier
-parameters.update({"KNN": { 
-                            "classifier__n_neighbors": list(range(1,31)),
-                            "classifier__p": [1, 2, 3, 4, 5],
-                            "classifier__leaf_size": [5, 10, 20, 30, 40, 50],
-                            "classifier__n_jobs": [-1]
-                             }})
-
-# Update dict with MLPClassifier
-parameters.update({"MLP": { 
-                            "classifier__hidden_layer_sizes": [(5,5), (10,10), (5,5,5), (10,10,10)],
-                            "classifier__activation": ["identity", "logistic", "tanh", "relu"],
-                            "classifier__learning_rate": ["constant", "invscaling", "adaptive"],
-                            "classifier__max_iter": [500, 1000, 2000],
-                            "classifier__alpha": list(10.0 ** -np.arange(1, 10)),
-                             }})
-
-parameters.update({"LSVC": { 
-                            "classifier__penalty": ["l2"],
-                            "classifier__C": [0.0001, 0.01, 0.1, 1.0, 10, 100]
-                             }})
-
-parameters.update({"NuSVC": { 
-                            "classifier__nu": [0.25, 0.50, 0.75],
-                            "classifier__kernel": ["linear", "rbf", "poly"],
-                            "classifier__degree": [1,3,5,6],
-                             }})
-
-parameters.update({"SVC": { 
-                            "classifier__kernel": ["linear", "rbf", "poly"],
-                            "classifier__gamma": ["auto"],
-                            "classifier__C": [0.1, 0.5, 1, 10, 50, 100],
-                            "classifier__degree": [1, 3, 5, 6]
-                             }})
-
-
-# Update dict with Decision Tree Classifier
-parameters.update({"DTC": { 
-                            "classifier__criterion" :["gini", "entropy"],
-                            "classifier__splitter": ["best", "random"],
-                            "classifier__class_weight": [None, "balanced"],
-                            "classifier__max_features": [ "sqrt", "log2"],
-                            "classifier__max_depth" : [1,2,3, 4, 5, 6, 7, 8],
+parameters = {
+    "LDA": {
+        "classifier__solver": ["svd"]
+    },
+    "QDA": {
+        "classifier__reg_param": [0.01 * ii for ii in range(0, 101)]
+    },
+    "AdaBoost": {
+        "classifier__estimator": [DecisionTreeClassifier(max_depth=ii) for ii in range(1, 6)],
+        "classifier__n_estimators": [200],
+        "classifier__learning_rate": [0.001, 0.01, 0.05, 0.1, 0.25, 0.50, 0.75, 1.0]
+    },
+    "Bagging": {
+        "classifier__estimator": [DecisionTreeClassifier(max_depth=ii) for ii in range(1, 6)],
+        "classifier__n_estimators": [200],
+        "classifier__max_features": [0.2, 0.4, 0.6, 0.8, 0.9, 1.0],
+        "classifier__n_jobs": [-1]
+    },
+    # Update dict with Gradient Boosting
+    "Gradient Boosting": { 
+                            "classifier__learning_rate":[0.15,0.1,0.01,0.001], 
+                            "classifier__n_estimators": [200],
+                            "classifier__max_depth": [2,3,4,5,6],
                             "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                             "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                             }})
-
-# Update dict with Extra Tree Classifier
-parameters.update({"ETC": { 
-                            "classifier__criterion" :["gini", "entropy"],
-                            "classifier__splitter": ["best", "random"],
+                            "classifier__max_features": [ "sqrt", "log2"],
+                            "classifier__subsample": [0.8, 0.9, 1]
+    },
+    # Update dict with Extra Trees
+    "Extra Trees Ensemble": { 
+                            "classifier__n_estimators": [200],
                             "classifier__class_weight": [None, "balanced"],
                             "classifier__max_features": [ "sqrt", "log2"],
-                            "classifier__max_depth" : [1,3,5,7,8],
+                            "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
                             "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                             "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                             }})
+                            "classifier__criterion" :["gini", "entropy"],
+                            "classifier__n_jobs": [-1]
+    },
+    # Update dict with Random Forest Parameters
+    "Random Forest": { 
+                        "classifier__n_estimators": [200],
+                        "classifier__class_weight": [None, "balanced"],
+                        "classifier__max_features": [ "sqrt", "log2"],
+                        "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
+                        "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
+                        "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
+                        "classifier__criterion" :["gini", "entropy"]     ,
+                        "classifier__n_jobs": [-1]
+    },
+    # Update dict with Ridge
+    "Ridge": { 
+                "classifier__alpha": [1e-7, 1e-5, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
+    },
+    # Update dict with SGD Classifier
+    "SGD": { 
+            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0],
+            "classifier__penalty": ["l1", "l2"],
+            "classifier__n_jobs": [-1]
+    },
+    # Update dict with BernoulliNB Classifier
+    "BNB": { 
+            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
+    },
+    # Update dict with GaussianNB Classifier
+    "GNB": { 
+            "classifier__var_smoothing": [1e-9, 1e-8,1e-7, 1e-6, 1e-5]
+    },
+    # Update dict with K Nearest Neighbors Classifier
+    "KNN": { 
+            "classifier__n_neighbors": list(range(1,31)),
+            "classifier__p": [1, 2, 3, 4, 5],
+            "classifier__leaf_size": [5, 10, 20, 30, 40, 50],
+            "classifier__n_jobs": [-1]
+    },
+    # Update dict with MLPClassifier
+    "MLP": { 
+            "classifier__hidden_layer_sizes": [(5,5), (10,10), (5,5,5), (10,10,10)],
+            "classifier__activation": ["identity", "logistic", "tanh", "relu"],
+            "classifier__learning_rate": ["constant", "invscaling", "adaptive"],
+            "classifier__max_iter": [500, 1000, 2000],
+            "classifier__alpha": list(10.0 ** -np.arange(1, 10)),
+    },
+    "LSVC": { 
+            "classifier__penalty": ["l2"],
+            "classifier__C": [0.0001, 0.01, 0.1, 1.0, 10, 100]
+    },
+    "NuSVC": { 
+            "classifier__nu": [0.25, 0.50, 0.75],
+            "classifier__kernel": ["linear", "rbf", "poly"],
+            "classifier__degree": [1,3,5,6],
+    },
+    "SVC": { 
+            "classifier__kernel": ["linear", "rbf", "poly"],
+            "classifier__gamma": ["auto"],
+            "classifier__C": [0.1, 0.5, 1, 10, 50, 100],
+            "classifier__degree": [1, 3, 5, 6]
+    },
+    # Update dict with Decision Tree Classifier
+    "DTC": { 
+            "classifier__criterion" :["gini", "entropy"],
+            "classifier__splitter": ["best", "random"],
+            "classifier__class_weight": [None, "balanced"],
+            "classifier__max_features": [ "sqrt", "log2"],
+            "classifier__max_depth" : [1,2,3, 4, 5, 6, 7, 8],
+            "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
+            "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
+    },
+    "ETC": {
+        "classifier__criterion": ["gini", "entropy"],
+        "classifier__splitter": ["best", "random"],
+        "classifier__class_weight": [None, "balanced"],
+        "classifier__max_features": ["sqrt", "log2"],
+        "classifier__max_depth": [1, 3, 5, 7, 8],
+        "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
+        "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10]
+    }
+}
+
+# Make sure to include all the classifiers in a similar format
+
+
+
+
+
+
+
+
+
+
 
 print('Hyperparameters Grid completed')
 
@@ -351,11 +345,17 @@ print(f'Selected Features {len(feature_names)}. Completed')
 #                             10. Performance Curve                           #
 ###############################################################################
 # Get Performance Data
-performance_curve = {"Number of Features": list(range(1, len(feature_names) + 1)),
-                    "AUC": feature_selector.grid_scores_}
-performance_curve = pd.DataFrame(performance_curve)
-filename = current_dir + '_performance_curve.csv'
-performance_curve.to_csv(filename)
+# Try to get performance data and save to CSV
+try:
+    performance_curve = {
+        "Number of Features": list(range(1, len(feature_names) + 1)),
+        "AUC": feature_selector.mean_test_score
+    }
+    performance_curve = pd.DataFrame(performance_curve)
+    filename = f"{current_dir}_performance_curve.csv"
+    performance_curve.to_csv(filename)
+except Exception as e:
+    print(f"Error in getting performance data or saving to CSV: {e}")
 
 # Performance vs Number of Features
 # Function to plot performance curve
