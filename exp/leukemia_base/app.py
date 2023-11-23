@@ -282,7 +282,7 @@ pipeline = Pipeline(steps = steps)
 param_grid = parameters[selected_classifier]
 
 # Initialize GridSearch object
-gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
+gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc", n_jobs = -1)
                   
 # Fit gscv
 print(f"Now tuning {selected_classifier}. Go grab a beer or something.")
@@ -318,7 +318,7 @@ steps = [("scaler", scaler), ("classifier", classifier)]
 pipe = PipelineRFE(steps = steps)
 
 # Initialize RFECV object
-feature_selector = RFECV(pipe, cv = 5, step = 1, scoring = "roc_auc", verbose = 1)
+feature_selector = RFECV(pipe, cv = 5, step = 1, scoring = "roc_auc", verbose = 1, n_jobs = -1)
 
 # Fit RFECV
 feature_selector.fit(X_train, np.ravel(y_train))
@@ -479,7 +479,7 @@ for classifier_label, classifier in classifiers.items():
         param_grid = parameters[classifier_label]
         
         # Initialize GridSearch object
-        gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
+        gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc", n_jobs = -1)
 
         # Fit gscv and evaluate
         gscv.fit(X_train, np.ravel(y_train))  
