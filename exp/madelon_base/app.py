@@ -3,6 +3,7 @@
 #                          1. Importing Libraries                             #
 ###############################################################################
 # For reading, visualizing, and preprocessing data
+import os
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -11,10 +12,11 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import make_classification
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
-from sklearn.preprocessing import StandardScaler, Imputer
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
+import time  # Import the time module
 
 # Classifiers
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
@@ -26,15 +28,27 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.svm import LinearSVC, NuSVC, SVC
 from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
 
-from pathlib import Path
-current_dir = Path(__file__).resolve()
+# Method to find the root directory (assuming .git is in the root)
+def find_root_dir():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    while current_dir != os.path.dirname(current_dir):  # To avoid infinite loop
+        if ".git" in os.listdir(current_dir):
+            return current_dir
+        current_dir = os.path.dirname(current_dir)
+    return None  # Or raise an error if the root is not found
 
+root_dir = find_root_dir()
+
+train_file_path = os.path.join(root_dir, 'data', 'madelon_train.csv')
+test_file_path = os.path.join(root_dir, 'data', 'madelon_train.csv')
+current_dir =  root_dir + '/exp/madelon_base'
 
 ###############################################################################
 #                                 2. Get data                                 #
 ###############################################################################
-train = pl.read_csv('data/madelon_train.csv')
-test = pl.read_csv('data/madelon_test.csv')
+
+train = pl.read_csv(train_file_path)
+test = pl.read_csv(test_file_path)
 
 X = pl.concat(
     [
@@ -47,6 +61,7 @@ X = pl.concat(
 y = X.select(pl.col('class')).to_pandas()
 X = X.select(pl.col('*').exclude('class')).to_pandas()
 
+print('Get data completed')
 ###############################################################################
 #                        3. Create train and test set                         #
 ###############################################################################
@@ -54,30 +69,31 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20,
                                                     random_state = 1000)
 
 
-
+print('Train and test split completed')
 ###############################################################################
 #                               4. Classifiers                                #
 ###############################################################################
 # Create list of tuples with classifier label and classifier object
-classifiers = {}
-classifiers.update({"LDA": LinearDiscriminantAnalysis()})
-classifiers.update({"QDA": QuadraticDiscriminantAnalysis()})
-classifiers.update({"AdaBoost": AdaBoostClassifier()})
-classifiers.update({"Bagging": BaggingClassifier()})
-classifiers.update({"Extra Trees Ensemble": ExtraTreesClassifier()})
-classifiers.update({"Gradient Boosting": GradientBoostingClassifier()})
-classifiers.update({"Random Forest": RandomForestClassifier()})
-classifiers.update({"Ridge": RidgeClassifier()})
-classifiers.update({"SGD": SGDClassifier()})
-classifiers.update({"BNB": BernoulliNB()})
-classifiers.update({"GNB": GaussianNB()})
-classifiers.update({"KNN": KNeighborsClassifier()})
-classifiers.update({"MLP": MLPClassifier()})
-classifiers.update({"LSVC": LinearSVC()})
-classifiers.update({"NuSVC": NuSVC()})
-classifiers.update({"SVC": SVC()})
-classifiers.update({"DTC": DecisionTreeClassifier()})
-classifiers.update({"ETC": ExtraTreeClassifier()})
+classifiers = {
+    "LDA": LinearDiscriminantAnalysis(),
+    "QDA": QuadraticDiscriminantAnalysis(),
+    "AdaBoost": AdaBoostClassifier(),
+    "Bagging": BaggingClassifier(),
+    "Extra Trees Ensemble": ExtraTreesClassifier(),
+    "Gradient Boosting": GradientBoostingClassifier(),
+    "Random Forest": RandomForestClassifier(),
+    "Ridge": RidgeClassifier(),
+    "SGD": SGDClassifier(),
+    "BNB": BernoulliNB(),
+    "GNB": GaussianNB(),
+    "KNN": KNeighborsClassifier(),
+    "MLP": MLPClassifier(),
+    "LSVC": LinearSVC(),
+    "NuSVC": NuSVC(),
+    "SVC": SVC(),
+    "DTC": DecisionTreeClassifier(),
+    "ETC": ExtraTreeClassifier()
+}
 
 # Create dict of decision function labels
 DECISION_FUNCTIONS = {"Ridge", "SGD", "LSVC", "NuSVC", "SVC"}
@@ -85,7 +101,7 @@ DECISION_FUNCTIONS = {"Ridge", "SGD", "LSVC", "NuSVC", "SVC"}
 # Create dict for classifiers with feature_importances_ attribute
 FEATURE_IMPORTANCE = {"Gradient Boosting", "Extra Trees Ensemble", "Random Forest"}
 
-
+print('Classifiers completed')
 ###############################################################################
 #                             5. Hyper-parameters                             #
 ###############################################################################
@@ -101,27 +117,27 @@ parameters.update({"QDA": {"classifier__reg_param":[0.01*ii for ii in range(0, 1
                                          }})
 # Update dict with AdaBoost
 parameters.update({"AdaBoost": { 
-                                "classifier__base_estimator": [DecisionTreeClassifier(max_depth = ii) for ii in range(1,6)],
+                                "classifier__estimator": [DecisionTreeClassifier(max_depth = ii) for ii in range(1,6)],
                                 "classifier__n_estimators": [200],
                                 "classifier__learning_rate": [0.001, 0.01, 0.05, 0.1, 0.25, 0.50, 0.75, 1.0]
                                  }})
 
 # Update dict with Bagging
 parameters.update({"Bagging": { 
-                                "classifier__base_estimator": [DecisionTreeClassifier(max_depth = ii) for ii in range(1,6)],
+                                "classifier__estimator": [DecisionTreeClassifier(max_depth = ii) for ii in range(1,6)],
                                 "classifier__n_estimators": [200],
-                                "classifier__max_features": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+                                "classifier__max_features": [0.2, 0.4, 0.6, 0.8, 0.9, 1.0],
                                 "classifier__n_jobs": [-1]
                                 }})
 
 # Update dict with Gradient Boosting
 parameters.update({"Gradient Boosting": { 
-                                        "classifier__learning_rate":[0.15,0.1,0.05,0.01,0.005,0.001], 
+                                        "classifier__learning_rate":[0.15,0.1,0.01,0.001], 
                                         "classifier__n_estimators": [200],
                                         "classifier__max_depth": [2,3,4,5,6],
                                         "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                                         "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                                        "classifier__max_features": ["auto", "sqrt", "log2"],
+                                        "classifier__max_features": [ "sqrt", "log2"],
                                         "classifier__subsample": [0.8, 0.9, 1]
                                          }})
 
@@ -130,7 +146,7 @@ parameters.update({"Gradient Boosting": {
 parameters.update({"Extra Trees Ensemble": { 
                                             "classifier__n_estimators": [200],
                                             "classifier__class_weight": [None, "balanced"],
-                                            "classifier__max_features": ["auto", "sqrt", "log2"],
+                                            "classifier__max_features": [ "sqrt", "log2"],
                                             "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
                                             "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                                             "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
@@ -143,7 +159,7 @@ parameters.update({"Extra Trees Ensemble": {
 parameters.update({"Random Forest": { 
                                     "classifier__n_estimators": [200],
                                     "classifier__class_weight": [None, "balanced"],
-                                    "classifier__max_features": ["auto", "sqrt", "log2"],
+                                    "classifier__max_features": [ "sqrt", "log2"],
                                     "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
                                     "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                                     "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
@@ -153,7 +169,7 @@ parameters.update({"Random Forest": {
 
 # Update dict with Ridge
 parameters.update({"Ridge": { 
-                            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
+                            "classifier__alpha": [1e-7, 1e-5, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
                              }})
 
 # Update dict with SGD Classifier
@@ -178,35 +194,35 @@ parameters.update({"GNB": {
 parameters.update({"KNN": { 
                             "classifier__n_neighbors": list(range(1,31)),
                             "classifier__p": [1, 2, 3, 4, 5],
-                            "classifier__leaf_size": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+                            "classifier__leaf_size": [5, 10, 20, 30, 40, 50],
                             "classifier__n_jobs": [-1]
                              }})
 
 # Update dict with MLPClassifier
 parameters.update({"MLP": { 
-                            "classifier__hidden_layer_sizes": [(5), (10), (5,5), (10,10), (5,5,5), (10,10,10)],
+                            "classifier__hidden_layer_sizes": [(5,5), (10,10), (5,5,5), (10,10,10)],
                             "classifier__activation": ["identity", "logistic", "tanh", "relu"],
                             "classifier__learning_rate": ["constant", "invscaling", "adaptive"],
-                            "classifier__max_iter": [100, 200, 300, 500, 1000, 2000],
+                            "classifier__max_iter": [500, 1000, 2000],
                             "classifier__alpha": list(10.0 ** -np.arange(1, 10)),
                              }})
 
 parameters.update({"LSVC": { 
                             "classifier__penalty": ["l2"],
-                            "classifier__C": [0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
+                            "classifier__C": [0.0001, 0.01, 0.1, 1.0, 10, 100]
                              }})
 
 parameters.update({"NuSVC": { 
                             "classifier__nu": [0.25, 0.50, 0.75],
                             "classifier__kernel": ["linear", "rbf", "poly"],
-                            "classifier__degree": [1,2,3,4,5,6],
+                            "classifier__degree": [1,3,5,6],
                              }})
 
 parameters.update({"SVC": { 
                             "classifier__kernel": ["linear", "rbf", "poly"],
                             "classifier__gamma": ["auto"],
-                            "classifier__C": [0.1, 0.5, 1, 5, 10, 50, 100],
-                            "classifier__degree": [1, 2, 3, 4, 5, 6]
+                            "classifier__C": [0.1, 0.5, 1, 10, 50, 100],
+                            "classifier__degree": [1, 3, 5, 6]
                              }})
 
 
@@ -215,7 +231,7 @@ parameters.update({"DTC": {
                             "classifier__criterion" :["gini", "entropy"],
                             "classifier__splitter": ["best", "random"],
                             "classifier__class_weight": [None, "balanced"],
-                            "classifier__max_features": ["auto", "sqrt", "log2"],
+                            "classifier__max_features": [ "sqrt", "log2"],
                             "classifier__max_depth" : [1,2,3, 4, 5, 6, 7, 8],
                             "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                             "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
@@ -226,17 +242,19 @@ parameters.update({"ETC": {
                             "classifier__criterion" :["gini", "entropy"],
                             "classifier__splitter": ["best", "random"],
                             "classifier__class_weight": [None, "balanced"],
-                            "classifier__max_features": ["auto", "sqrt", "log2"],
-                            "classifier__max_depth" : [1,2,3, 4, 5, 6, 7, 8],
+                            "classifier__max_features": [ "sqrt", "log2"],
+                            "classifier__max_depth" : [1,3,5,7,8],
                             "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
                             "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
                              }})
 
+print('Hyperparameters Grid completed')
 
 ###############################################################################
 #              6. Feature Selection: Removing highly correlated features      #
 ###############################################################################
 # Filter Method: Spearman's Cross Correlation > 0.95
+
 # Make correlation matrix
 corr_matrix = X_train.corr(method = "spearman").abs()
 
@@ -249,7 +267,7 @@ filename = current_dir + "correlation_matrix.png"
 plt.savefig(filename, dpi = 1080)
 
 # Select upper triangle of matrix
-upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k = 1).astype(np.bool))
+upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k = 1).astype(bool))
 
 # Find index of feature columns with correlation greater than 0.95
 to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
@@ -258,6 +276,7 @@ to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
 X_train = X_train.drop(to_drop, axis = 1)
 X_test = X_test.drop(to_drop, axis = 1)
 
+print(f'Removing features highly correleted {len(to_drop)}, of {X_train.shape[1]}. Completed')
 
 ###############################################################################
 #                     7. Tuning a classifier to use with RFECV                #
@@ -293,6 +312,7 @@ best_score = gscv.best_score_
 tuned_params = {item[12:]: best_params[item] for item in best_params}
 classifier.set_params(**tuned_params)
 
+print(f'Create a classifier to recursive feature elimination algorithm. Completed')
 
 ###############################################################################
 #                  8. Custom pipeline object to use with RFECV                #
@@ -322,10 +342,11 @@ feature_selector.fit(X_train, np.ravel(y_train))
 # Get selected features
 feature_names = X_train.columns
 selected_features = feature_names[feature_selector.support_].tolist()
-filename = current_dir + 'selected_features.txt'
+filename = current_dir + '_selected_features.txt'
 with open(filename, "w") as file:
     file.write(str(selected_features))
 
+print(f'Selected Features {len(feature_names)}. Completed')
 ###############################################################################
 #                             10. Performance Curve                           #
 ###############################################################################
@@ -333,40 +354,36 @@ with open(filename, "w") as file:
 performance_curve = {"Number of Features": list(range(1, len(feature_names) + 1)),
                     "AUC": feature_selector.grid_scores_}
 performance_curve = pd.DataFrame(performance_curve)
+filename = current_dir + '_performance_curve.csv'
+performance_curve.to_csv(filename)
 
 # Performance vs Number of Features
-# Set graph style
-sns.set(font_scale = 1.75)
-sns.set_style({"axes.facecolor": "1.0", "axes.edgecolor": "0.85", "grid.color": "0.85",
-               "grid.linestyle": "-", 'axes.labelcolor': '0.4', "xtick.color": "0.4",
-               'ytick.color': '0.4'})
-colors = sns.color_palette("RdYlGn", 20)
-line_color = colors[3]
-marker_colors = colors[-1]
+# Function to plot performance curve
 
-# Plot
-f, ax = plt.subplots(figsize=(13, 6.5))
-sns.lineplot(x = "Number of Features", y = "AUC", data = performance_curve,
-             color = line_color, lw = 4, ax = ax)
-sns.regplot(x = performance_curve["Number of Features"], y = performance_curve["AUC"],
-            color = marker_colors, fit_reg = False, scatter_kws = {"s": 200}, ax = ax)
+def plot_performance_curve(performance_curve, feature_names, current_dir):
+    try:
+        # Simplified graph style settings
+        sns.set(font_scale=1.75, style="whitegrid")
+        colors = sns.color_palette("RdYlGn", 20)
 
-# Axes limits
-plt.xlim(0.5, len(feature_names)+0.5)
-plt.ylim(0.60, 0.925)
+        # Create the plot
+        f, ax = plt.subplots(figsize=(13, 6.5))
+        sns.lineplot(x="Number of Features", y="AUC", data=performance_curve, color=colors[3], lw=4, ax=ax)
+        sns.scatterplot(x="Number of Features", y="AUC", data=performance_curve, color=colors[-1], s=200, ax=ax)
 
-# Generate a bolded horizontal line at y = 0
-ax.axhline(y = 0.625, color = 'black', linewidth = 1.3, alpha = .7)
+        # Set axes limits and horizontal line
+        plt.xlim(0.5, len(feature_names) + 0.5)
+        plt.ylim(0.60, 0.925)
+        ax.axhline(y=0.625, color='black', linewidth=1.3, alpha=0.7)
 
-# Turn frame off
-ax.set_frame_on(False)
+        # Save the figure
+        filename = f"{current_dir}_performance_curve.png"
+        plt.savefig(filename, dpi=1080)
+        plt.close(f)  # Close the figure to free memory
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-# Tight layout
-plt.tight_layout()
-
-# Save Figure
-filename = current_dir + "performance_curve.png"
-plt.savefig(filename, dpi = 1080)
+plot_performance_curve(performance_curve, feature_names, current_dir)
 
 
 ###############################################################################
@@ -403,31 +420,33 @@ feature_importance["Feature Importance"] = classifier.feature_importances_
 
 # Sort by feature importance
 feature_importance = feature_importance.sort_values(by="Feature Importance", ascending=False)
+feature_importance = pd.DataFrame(feature_importance)
+filename = current_dir + 'feature_importance.csv'
+feature_importance.to_csv(filename)
 
-# Set graph style
-sns.set(font_scale = 1.75)
-sns.set_style({"axes.facecolor": "1.0", "axes.edgecolor": "0.85", "grid.color": "0.85",
-               "grid.linestyle": "-", 'axes.labelcolor': '0.4', "xtick.color": "0.4",
-               'ytick.color': '0.4'})
+# Function to plot feature importance
+def plot_feature_importance(feature_importance, current_dir):
+    try:
+        # Set graph style
+        sns.set(font_scale=1.75, style="whitegrid")
 
-# Set figure size and create barplot
-f, ax = plt.subplots(figsize=(12, 9))
-sns.barplot(x = "Feature Importance", y = "Feature Label",
-            palette = reversed(sns.color_palette('YlOrRd', 15)),  data = feature_importance)
+        # Create bar plot
+        f, ax = plt.subplots(figsize=(12, 9))
+        sns.barplot(x="Feature Importance", y="Feature Label",
+                    palette=reversed(sns.color_palette('YlOrRd', 15)), data=feature_importance)
 
-# Generate a bolded horizontal line at y = 0
-ax.axvline(x = 0, color = 'black', linewidth = 4, alpha = .7)
+        # Generate a bolded horizontal line at x = 0
+        ax.axvline(x=0, color='black', linewidth=4, alpha=0.7)
 
-# Turn frame off
-ax.set_frame_on(False)
+        # Tight layout and save figure
+        plt.tight_layout()
+        filename = f"{current_dir}_feature_importance.png"
+        plt.savefig(filename, dpi=1080)
+        plt.close(f)  # Close the figure to free memory
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-# Tight layout
-plt.tight_layout()
-
-# Save Figure
-filename = current_dir + "feature_importance.png"
-plt.savefig(filename, dpi = 1080)
-
+plot_feature_importance(feature_importance, current_dir)
 
 ###############################################################################
 #                       13. Classifier Tuning and Evaluation                  #
@@ -437,52 +456,82 @@ results = {}
 
 # Tune and evaluate classifiers
 for classifier_label, classifier in classifiers.items():
-    # Print message to user
-    print(f"Now tuning {classifier_label}.")
-    
-    # Scale features via Z-score normalization
-    scaler = StandardScaler()
-    
-    # Define steps in pipeline
-    steps = [("scaler", scaler), ("classifier", classifier)]
-    
-    # Initialize Pipeline object
-    pipeline = Pipeline(steps = steps)
-      
-    # Define parameter grid
-    param_grid = parameters[classifier_label]
-    
-    # Initialize GridSearch object
-    gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
-                      
-    # Fit gscv
-    gscv.fit(X_train, np.ravel(y_train))  
-    
-    # Get best parameters and score
-    best_params = gscv.best_params_
-    best_score = gscv.best_score_
-    
-    # Update classifier parameters and define new pipeline with tuned classifier
-    tuned_params = {item[12:]: best_params[item] for item in best_params}
-    classifier.set_params(**tuned_params)
-            
-    # Make predictions
-    if classifier_label in DECISION_FUNCTIONS:
-        y_pred = gscv.decision_function(X_test)
-    else:
-        y_pred = gscv.predict_proba(X_test)[:,1]
-    
-    # Evaluate model
-    auc = metrics.roc_auc_score(y_test, y_pred)
-    
-    # Save results
-    result = {"Classifier": gscv,
-              "Best Parameters": best_params,
-              "Training AUC": best_score,
-              "Test AUC": auc}
-    
-    results.update({classifier_label: result})
+    try:
+        # Start the timer
+        start_time = time.time()
 
+        print(f"Now tuning {classifier_label}.")
+
+       # Scale features via Z-score normalization
+        scaler = StandardScaler()
+        
+        # Define steps in pipeline
+        steps = [("scaler", scaler), ("classifier", classifier)]
+        
+        # Initialize Pipeline object
+        pipeline = Pipeline(steps = steps)
+        
+        # Define parameter grid
+        param_grid = parameters[classifier_label]
+        
+        # Initialize GridSearch object
+        gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
+
+        # Fit gscv and evaluate
+        gscv.fit(X_train, np.ravel(y_train))  
+        best_params = gscv.best_params_
+        best_score = gscv.best_score_
+
+         # Update classifier parameters and define new pipeline with tuned classifier
+        tuned_params = {item[12:]: best_params[item] for item in best_params}
+        classifier.set_params(**tuned_params)
+                
+        # Make predictions
+        if classifier_label in DECISION_FUNCTIONS:
+            y_pred = gscv.decision_function(X_test)
+        else:
+            y_pred = gscv.predict_proba(X_test)[:,1]
+        
+        # Evaluate model
+        auc = metrics.roc_auc_score(y_test, y_pred)
+
+        # End the timer
+        end_time = time.time()
+        time_taken = (end_time - start_time) / 60  # Convert seconds to minutes
+        print(f"Time taken for {classifier_label}: {time_taken:.2f} minutes.")
+
+        # Save results
+        results[classifier_label] = {
+            "Best Parameters": str(best_params),
+            "Training AUC": best_score,
+            "Test AUC": auc,
+            "Time Taken (minutes)": time_taken
+        }
+
+    except Exception as e:
+        print(f"Error with classifier {classifier_label}: {e}")
+        results[classifier_label] = {"Error": str(e)}
+
+# Convert results to DataFrame and save as CSV
+results_df = pd.DataFrame.from_dict(results, orient='index')
+filename = f"{current_dir}_classifiers_AUC"
+
+try:
+    # Try to save as CSV
+    results_df.to_csv(f"{filename}.csv")
+    print(f"Results saved as CSV in {filename}.csv")
+except Exception as e:
+    print(f"Failed to save as CSV due to: {e}\nSaving as a TXT file.")
+
+    # Save as TXT
+    with open(f"{filename}.txt", "w") as file:
+        for classifier_label, result in results.items():
+            file.write(f"{classifier_label}:\n")
+            for key, value in result.items():
+                file.write(f"  {key}: {value}\n")
+            file.write("\n")
+
+    print(f"Results saved as TXT in {filename}.txt")
 
 ###############################################################################
 #                              14. Visualing Results                          #
@@ -509,33 +558,30 @@ auc_scores = pd.DataFrame(auc_scores)
 filename = current_dir + 'auc_scores.csv'
 auc_scores.to_csv(filename)
 
-# Set graph style
-sns.set(font_scale = 1.75)
-sns.set_style({"axes.facecolor": "1.0", "axes.edgecolor": "0.85", "grid.color": "0.85",
-               "grid.linestyle": "-", 'axes.labelcolor': '0.4', "xtick.color": "0.4",
-               'ytick.color': '0.4'})
+# Function to plot AUC scores
+def plot_auc_scores(auc_scores, current_dir):
+    try:
+        # Set graph style
+        sns.set(font_scale=1.75, style="whitegrid")
 
-    
-# Colors
-training_color = sns.color_palette("RdYlBu", 10)[1]
-test_color = sns.color_palette("RdYlBu", 10)[-2]
-colors = [training_color, test_color]
+        # Define colors
+        training_color = sns.color_palette("RdYlBu", 10)[1]
+        test_color = sns.color_palette("RdYlBu", 10)[-2]
+        colors = [training_color, test_color]
 
-# Set figure size and create barplot
-f, ax = plt.subplots(figsize=(12, 9))
+        # Create bar plot
+        f, ax = plt.subplots(figsize=(12, 9))
+        sns.barplot(x="AUC", y="Classifier", hue="AUC Type", palette=colors, data=auc_scores)
 
-sns.barplot(x="AUC", y="Classifier", hue="AUC Type", palette = colors,
-            data=auc_scores)
+        # Generate a bolded horizontal line at x = 0
+        ax.axvline(x=0, color='black', linewidth=4, alpha=0.7)
 
-# Generate a bolded horizontal line at y = 0
-ax.axvline(x = 0, color = 'black', linewidth = 4, alpha = .7)
+        # Tight layout and save figure
+        plt.tight_layout()
+        filename = f"{current_dir}_AUC_Scores.png"
+        plt.savefig(filename, dpi=1080)
+        plt.close(f)  # Close the figure to free memory
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-# Turn frame off
-ax.set_frame_on(False)
-
-# Tight layout
-plt.tight_layout()
-
-# Save Figure
-filename = current_dir + "AUC Scores.png"
-plt.savefig(filename, dpi = 1080)
+plot_auc_scores(auc_scores, current_dir)
