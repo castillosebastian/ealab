@@ -2,3 +2,4 @@
 /src/archive
 /mlruns
 /cloud
+*.arff

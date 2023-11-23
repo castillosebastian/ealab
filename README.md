@@ -12,4 +12,6 @@ Results overview:
 - `mlflow server`  
 
 TODO:
-- fix BO hyperparameters search: `BO_madelon.ipnb``
+- fix BO hyperparameters search: `BO_madelon.ipnb``, https://github.com/bayesian-optimization/BayesianOptimization,
+  https://github.com/bayesian-optimization/BayesianOptimization/blob/master/examples/sklearn_example.py, 
+  https://towardsdatascience.com/bayesian-optimization-with-python-85c66df711ec, 
