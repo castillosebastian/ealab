@@ -48,14 +48,14 @@ root_dir = find_root_dir()
 
 train_file_path = os.path.join(root_dir, 'data', 'leuk_train.csv')
 test_file_path = os.path.join(root_dir, 'data', 'leuk_test.csv')
-current_dir =  root_dir + '/exp/leukemia_base'
+current_dir =  root_dir + '/exp/leukemia_base/'
 
 ###############################################################################
 #                                 2. Get data                                 #
 ###############################################################################
-
-train = pl.read_csv(train_file_path)
-test = pl.read_csv(test_file_path)
+# column_7130 set the class
+train = pl.read_csv(train_file_path, has_header = False)
+test = pl.read_csv(test_file_path, has_header = False)
 
 X = pl.concat(
     [
@@ -65,8 +65,8 @@ X = pl.concat(
     how='vertical'
 )
 
-y = X.select(pl.col('class')).to_pandas()
-X = X.select(pl.col('*').exclude('class')).to_pandas()
+y = X.select(pl.col('column_7130')).to_pandas()
+X = X.select(pl.col('*').exclude('column_7130')).to_pandas()
 
 print('Get data completed')
 ###############################################################################
