@@ -46,9 +46,9 @@ def find_root_dir():
 
 root_dir = find_root_dir()
 
-train_file_path = os.path.join(root_dir, 'data', 'madelon_train.csv')
-test_file_path = os.path.join(root_dir, 'data', 'madelon_tes.csv')
-current_dir =  root_dir + '/exp/madelon_base'
+train_file_path = os.path.join(root_dir, 'data', 'leuk_train.csv')
+test_file_path = os.path.join(root_dir, 'data', 'leuk_test.csv')
+current_dir =  root_dir + '/exp/leukemia_base'
 
 ###############################################################################
 #                                 2. Get data                                 #
