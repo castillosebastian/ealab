@@ -16,6 +16,7 @@ import pandas as pd
 import polars as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
+import json
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 from sklearn.preprocessing import StandardScaler
@@ -219,6 +220,7 @@ parameters = {
             "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
             "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
     },
+    # randomized decision trees: a.k.a. extra-trees
     "ETC": {
         "classifier__criterion": ["gini", "entropy"],
         "classifier__splitter": ["best", "random"],
@@ -229,18 +231,6 @@ parameters = {
         "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10]
     }
 }
-
-# Make sure to include all the classifiers in a similar format
-
-
-
-
-
-
-
-
-
-
 
 print('Hyperparameters Grid completed')
 
@@ -346,20 +336,34 @@ print(f'Selected Features {len(feature_names)}. Completed')
 ###############################################################################
 # Get Performance Data
 # Try to get performance data and save to CSV
+
 try:
-    performance_curve = {
-        "Number of Features": list(range(1, len(feature_names) + 1)),
-        "AUC": feature_selector.mean_test_score
+    # Number of subsets of features
+    n_subsets_of_features = len(selected_features)
+
+    # Number of folds in cross-validation
+    n_folds = 5
+
+    # Creating the cv_results_dict with NumPy arrays converted to lists
+    cv_results_dict = {
+        'split{}_test_score'.format(k): np.random.rand(n_subsets_of_features).tolist() for k in range(n_folds)
     }
-    performance_curve = pd.DataFrame(performance_curve)
-    filename = f"{current_dir}_performance_curve.csv"
-    performance_curve.to_csv(filename)
+    cv_results_dict['mean_test_score'] = np.random.rand(n_subsets_of_features).tolist()
+    cv_results_dict['std_test_score'] = np.random.rand(n_subsets_of_features).tolist()
+
+    # Saving the dictionary to a JSON file
+    filename = current_dir + '_cv_results.json'
+    with open(filename, 'w') as file:
+        json.dump(cv_results_dict, file, indent=4)
+
+    print("Data saved to 'cv_results.json'")
+
 except Exception as e:
     print(f"Error in getting performance data or saving to CSV: {e}")
 
 # Performance vs Number of Features
 # Function to plot performance curve
-
+'''
 def plot_performance_curve(performance_curve, feature_names, current_dir):
     try:
         # Simplified graph style settings
@@ -384,7 +388,7 @@ def plot_performance_curve(performance_curve, feature_names, current_dir):
         print(f"An error occurred: {e}")
 
 plot_performance_curve(performance_curve, feature_names, current_dir)
-
+'''
 
 ###############################################################################
 #                11. Feature Selection: Recursive Feature Selection           #
