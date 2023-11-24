@@ -2,4 +2,5 @@
 /src/archive
 /mlruns
 /cloud
+/exp/leukemia_base/correlation_matrix.png
 *.arff
