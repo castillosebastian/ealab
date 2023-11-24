@@ -107,9 +107,7 @@ print('Classifiers completed')
 ###############################################################################
 #                             5. Hyper-parameters                             #
 ###############################################################################
-Copy code
 # Defining the hyperparameter spaces for the specified machine learning models
-
 parameters = {
 
     "Extra Trees Ensemble": { 
