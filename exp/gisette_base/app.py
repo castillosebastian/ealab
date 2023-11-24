@@ -54,8 +54,8 @@ current_dir =  root_dir + '/exp/gisette_base/'
 #                                 2. Get data                                 #
 ###############################################################################
 # column_7130 set the class
-train = pl.read_csv(train_file_path, has_header = False)
-test = pl.read_csv(test_file_path, has_header = False)
+train = pl.read_csv(train_file_path, has_header = True)
+test = pl.read_csv(test_file_path, has_header = True)
 print(f'train shape {train.shape}')
 print(f'test shape {test.shape}')
 
@@ -284,7 +284,7 @@ pipeline = Pipeline(steps = steps)
 param_grid = parameters[selected_classifier]
 
 # Initialize GridSearch object
-gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc", n_jobs = -1)
+gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
                   
 # Fit gscv
 print(f"Now tuning {selected_classifier}. Go grab a beer or something.")
@@ -481,7 +481,7 @@ for classifier_label, classifier in classifiers.items():
         param_grid = parameters[classifier_label]
         
         # Initialize GridSearch object
-        gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc", n_jobs = -1)
+        gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
 
         # Fit gscv and evaluate
         gscv.fit(X_train, np.ravel(y_train))  
