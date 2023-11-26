@@ -1,0 +1,19 @@
+,Best Parameters,Training AUC,Test AUC,Time Taken (minutes)
+LDA,{'classifier__solver': 'svd'},0.9218175695661186,0.9205851939156733,0.025581570466359456
+QDA,{'classifier__reg_param': 0.1},0.9670722560955415,0.9721996753246754,0.029559544722239175
+AdaBoost,"{'classifier__estimator': DecisionTreeClassifier(max_depth=4), 'classifier__learning_rate': 0.01, 'classifier__n_estimators': 200}",0.9726532351434469,0.9778912226472158,0.32502370278040565
+Bagging,"{'classifier__estimator': DecisionTreeClassifier(max_depth=5), 'classifier__max_features': 0.8, 'classifier__n_estimators': 200, 'classifier__n_jobs': -1}",0.9732795745509989,0.9769711239103362,0.20103553136189778
+Extra Trees Ensemble,"{'classifier__class_weight': None, 'classifier__criterion': 'entropy', 'classifier__max_depth': 8, 'classifier__max_features': 'log2', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.01, 'classifier__n_estimators': 200, 'classifier__n_jobs': -1}",0.9719188397510793,0.9753018813378401,2.287126151720683
+Gradient Boosting,"{'classifier__learning_rate': 0.1, 'classifier__max_depth': 5, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.01, 'classifier__min_samples_split': 0.1, 'classifier__n_estimators': 200, 'classifier__subsample': 0.8}",0.9764516048447385,0.9796160603095534,5.622489722569783
+Random Forest,"{'classifier__class_weight': None, 'classifier__criterion': 'gini', 'classifier__max_depth': 8, 'classifier__max_features': 'log2', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.01, 'classifier__n_estimators': 200, 'classifier__n_jobs': -1}",0.9726237344370251,0.975329678882761,3.3128604769706724
+Ridge,{'classifier__alpha': 0.1},0.9218193057450493,0.9205851939156733,0.0033794085184733072
+SGD,"{'classifier__alpha': 0.1, 'classifier__n_jobs': -1, 'classifier__penalty': 'l2'}",0.927620790450025,0.9294943070628001,0.006983069578806559
+BNB,{'classifier__alpha': 1e-07},0.9208895981226242,0.9203030488347269,0.004798420270284017
+GNB,{'classifier__var_smoothing': 1e-09},0.9296469202562785,0.9314707125066715,0.001596677303314209
+KNN,"{'classifier__leaf_size': 30, 'classifier__n_jobs': -1, 'classifier__n_neighbors': 30, 'classifier__p': 1}",0.9717617083176266,0.9783137453300126,0.929240902264913
+MLP,"{'classifier__activation': 'tanh', 'classifier__alpha': 0.1, 'classifier__hidden_layer_sizes': (10, 10), 'classifier__learning_rate': 'constant', 'classifier__max_iter': 1000}",0.9768192341128976,0.9804638854296388,24.323047824700673
+LSVC,"{'classifier__C': 10, 'classifier__penalty': 'l2'}",0.9337226376443889,0.9354735589752713,0.012155826886494954
+NuSVC,"{'classifier__degree': 1, 'classifier__kernel': 'rbf', 'classifier__nu': 0.25}",0.9710741909696848,0.9759773616794165,0.12430851856867473
+SVC,"{'classifier__C': 0.1, 'classifier__degree': 1, 'classifier__gamma': 'auto', 'classifier__kernel': 'rbf'}",0.9717608580188257,0.9756882672122397,5.727681410312653
+DTC,"{'classifier__class_weight': 'balanced', 'classifier__criterion': 'gini', 'classifier__max_depth': 8, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.01, 'classifier__splitter': 'best'}",0.9596648003935361,0.9626734566803059,0.16901705662409464
+ETC,"{'classifier__class_weight': None, 'classifier__criterion': 'gini', 'classifier__max_depth': 8, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.01, 'classifier__splitter': 'best'}",0.9603410511208116,0.958168864525885,0.11610211928685506

@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import json
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
@@ -85,7 +86,8 @@ print('Train and test split completed')
 ###############################################################################
 # Create list of tuples with classifier label and classifier object
 # Update the classifiers dictionary for multi-class classification
-classifiers = {    
+classifiers = { 
+    "Gradient Boosting": GradientBoostingClassifier(),   
     "Extra Trees Ensemble": ExtraTreesClassifier(class_weight='balanced'),    
     "Random Forest": RandomForestClassifier(class_weight='balanced'),   
     "SGD": SGDClassifier(class_weight='balanced'),
@@ -109,6 +111,16 @@ print('Classifiers completed')
 ###############################################################################
 # Defining the hyperparameter spaces for the specified machine learning models
 parameters = {
+    # Update dict with Gradient Boosting
+    "Gradient Boosting": { 
+                            "classifier__learning_rate":[0.15,0.1,0.01,0.001], 
+                            "classifier__n_estimators": [200],
+                            "classifier__max_depth": [2,3,4,5,6],
+                            "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
+                            "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
+                            "classifier__max_features": [ "sqrt", "log2"],
+                            "classifier__subsample": [0.8, 0.9, 1]
+    },
 
     "Extra Trees Ensemble": { 
         "classifier__n_estimators": [100, 200, 300],
@@ -196,7 +208,8 @@ print('Hyperparameters Grid completed')
 #                     7. Tuning a classifier to use with RFECV                #
 ###############################################################################
 # Define classifier to use as the base of the recursive feature elimination algorithm
-selected_classifier = "Random Forest"
+
+selected_classifier = "Gradient Boosting" # Random Fores did not work
 classifier = classifiers[selected_classifier]
 
 # Scale features via Z-score normalization
@@ -215,15 +228,15 @@ param_grid = parameters[selected_classifier]
 f1_weighted_scorer = make_scorer(f1_score, average='weighted')
 
 # Initialize GridSearch object with a multi-class compatible scorer
-gscv = GridSearchCV(pipeline, param_grid, cv=5, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer)
+rscv = RandomizedSearchCV(pipeline, param_grid, n_iter=5, cv=3, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer, random_state=42)
 
-# Fit gscv
+# Fit rscv
 print(f"Now tuning {selected_classifier}. Please wait.")
-gscv.fit(X_train, np.ravel(y_train))  
+rscv.fit(X_train, np.ravel(y_train))  
 
 # Get best parameters and score
-best_params = gscv.best_params_
-best_score = gscv.best_score_
+best_params = rscv.best_params_
+best_score = rscv.best_score_
 
 # Update classifier parameters
 tuned_params = {item.replace("classifier__", ""): best_params[item] for item in best_params}
@@ -237,6 +250,7 @@ print(f'Classifier {selected_classifier} tuned and ready for feature elimination
 ###############################################################################
 
 # Custom pipeline class to handle feature importances
+
 class PipelineRFE(Pipeline):
     def fit(self, X, y=None, **fit_params):
         super(PipelineRFE, self).fit(X, y, **fit_params)
@@ -333,6 +347,7 @@ plot_performance_curve(performance_curve, feature_names, current_dir)
 ###############################################################################
 #                11. Feature Selection: Recursive Feature Selection           #
 ###############################################################################
+
 # Define pipeline for RFECV
 steps = [("scaler", scaler), ("classifier", classifier)]
 pipe = PipelineRFE(steps = steps)
@@ -502,30 +517,26 @@ except Exception as e:
 ###############################################################################
 #                              14. Visualing Results                          #
 ###############################################################################
-# Initialize auc_score dictionary
-auc_scores = {
-              "Classifier": [],
-              "AUC": [],
-              "AUC Type": []
-              }
+# Initialize f1_score dictionary
+f1_scores = {
+    "Classifier": [],
+    "F1 Score": [],
+    "F1 Score Type": []
+}
 
-# Get AUC scores into dictionary
+# Get F1 scores into the dictionary
 for classifier_label in results:
-    auc_scores.update({"Classifier": [classifier_label] + auc_scores["Classifier"],
-                       "AUC": [results[classifier_label]["Training AUC"]] + auc_scores["AUC"],
-                       "AUC Type": ["Training"] + auc_scores["AUC Type"]})
-    
-    auc_scores.update({"Classifier": [classifier_label] + auc_scores["Classifier"],
-                       "AUC": [results[classifier_label]["Test AUC"]] + auc_scores["AUC"],
-                       "AUC Type": ["Test"] + auc_scores["AUC Type"]})
+    f1_scores["Classifier"].extend([classifier_label, classifier_label])
+    f1_scores["F1 Score"].extend([results[classifier_label]["Training F1-Score"], results[classifier_label]["Test F1-Score"]])
+    f1_scores["F1 Score Type"].extend(["Training", "Test"])
 
-# Dictionary to PandasDataFrame
-auc_scores = pd.DataFrame(auc_scores)
-filename = current_dir + 'auc_scores.csv'
-auc_scores.to_csv(filename)
+# Dictionary to Pandas DataFrame
+f1_scores_df = pd.DataFrame(f1_scores)
+filename = current_dir + 'f1_scores.csv'
+f1_scores_df.to_csv(filename)
 
-# Function to plot AUC scores
-def plot_auc_scores(auc_scores, current_dir):
+# Function to plot F1 scores
+def plot_f1_scores(f1_scores_df, current_dir):
     try:
         # Set graph style
         sns.set(font_scale=1.75, style="whitegrid")
@@ -537,17 +548,17 @@ def plot_auc_scores(auc_scores, current_dir):
 
         # Create bar plot
         f, ax = plt.subplots(figsize=(12, 9))
-        sns.barplot(x="AUC", y="Classifier", hue="AUC Type", palette=colors, data=auc_scores)
+        sns.barplot(x="F1 Score", y="Classifier", hue="F1 Score Type", palette=colors, data=f1_scores_df)
 
         # Generate a bolded horizontal line at x = 0
         ax.axvline(x=0, color='black', linewidth=4, alpha=0.7)
 
         # Tight layout and save figure
         plt.tight_layout()
-        filename = f"{current_dir}_AUC_Scores.png"
+        filename = f"{current_dir}_F1_Scores.png"
         plt.savefig(filename, dpi=1080)
         plt.close(f)  # Close the figure to free memory
     except Exception as e:
         print(f"An error occurred: {e}")
 
-plot_auc_scores(auc_scores, current_dir)
+plot_f1_scores(f1_scores_df, current_dir)
