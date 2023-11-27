@@ -145,7 +145,7 @@ parameters = {
     },
 
     "SGD": { 
-        "classifier__loss": ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
+        "classifier__loss": ['hinge', 'log_loss', 'modified_huber', 'squared_hinge', 'perceptron'],
         "classifier__alpha": [1e-7, 1e-5, 1e-3, 1e-2, 1e-1],
         "classifier__penalty": ['l2', 'l1', 'elasticnet'],
         "classifier__learning_rate": ['constant', 'optimal', 'invscaling', 'adaptive'],
@@ -208,7 +208,7 @@ print('Hyperparameters Grid completed')
 #                     7. Tuning a classifier to use with RFECV                #
 ###############################################################################
 # Define classifier to use as the base of the recursive feature elimination algorithm
-
+'''
 selected_classifier = "Gradient Boosting" # Random Fores did not work
 classifier = classifiers[selected_classifier]
 
@@ -317,7 +317,7 @@ except Exception as e:
 
 # Performance vs Number of Features
 # Function to plot performance curve
-'''
+
 def plot_performance_curve(performance_curve, feature_names, current_dir):
     try:
         # Simplified graph style settings
@@ -342,7 +342,7 @@ def plot_performance_curve(performance_curve, feature_names, current_dir):
         print(f"An error occurred: {e}")
 
 plot_performance_curve(performance_curve, feature_names, current_dir)
-'''
+
 
 ###############################################################################
 #                11. Feature Selection: Recursive Feature Selection           #
@@ -421,8 +421,8 @@ def plot_feature_importance(feature_importance, current_dir):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-plot_feature_importance(feature_importance, current_dir)
-
+plot_feature_importance(feature_importance, current_dir
+'''
 ###############################################################################
 #                       13. Classifier Tuning and Evaluation                  #
 ###############################################################################
