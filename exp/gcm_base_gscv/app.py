@@ -50,7 +50,7 @@ root_dir = find_root_dir()
 
 train_file_path = os.path.join(root_dir, 'data', 'gcm_train.csv')
 test_file_path = os.path.join(root_dir, 'data', 'gcm_test.csv')
-current_dir =  root_dir + '/exp/gcm_base/'
+current_dir =  root_dir + '/exp/gcm_base_gscv/'
 
 ###############################################################################
 #                                 2. Get data                                 #
@@ -455,7 +455,7 @@ for classifier_label, classifier in classifiers.items():
 
         # Initialize RandomizedSearchCV object with a multi-class compatible scorer
         # Adjust n_iter to control the number of parameter settings sampled
-        gs = GridSearchCV(pipeline, param_grid, n_iter=10, cv=5, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer, random_state=42)
+        gs = GridSearchCV(pipeline, param_grid, cv=5, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer)       
 
         # Fit RandomizedSearchCV and evaluate
         gs.fit(X_train, np.ravel(y_train))
