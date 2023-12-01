@@ -86,6 +86,7 @@ print('Train and test split completed')
 ###############################################################################
 # Create list of tuples with classifier label and classifier object
 # Update the classifiers dictionary for multi-class classification
+# Selected classifiers based on the posibility of class weight balanced!
 classifiers = { 
     "Gradient Boosting": GradientBoostingClassifier(),   
     "Extra Trees Ensemble": ExtraTreesClassifier(class_weight='balanced'),    

@@ -72,6 +72,7 @@ print('Get data completed')
 ###############################################################################
 #                        3. Create train and test set                         #
 ###############################################################################
+# Reproducir con train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20,
                                                     random_state = 1000)
 
@@ -489,7 +490,10 @@ for classifier_label, classifier in classifiers.items():
          # Update classifier parameters and define new pipeline with tuned classifier
         tuned_params = {item[12:]: best_params[item] for item in best_params}
         classifier.set_params(**tuned_params)
-                
+
+        # Probar nueva instancia del clasificador!
+        # Nuevo entrenamiento del clasificador!
+
         # Make predictions
         if classifier_label in DECISION_FUNCTIONS:
             y_pred = gscv.decision_function(X_test)

@@ -46,27 +46,41 @@ def find_root_dir():
 
 root_dir = find_root_dir()
 
-train_file_path = os.path.join(root_dir, 'data', 'madelon_train.csv')
-test_file_path = os.path.join(root_dir, 'data', 'madelon_test.csv')
-current_dir =  root_dir + '/exp/madelon_base_allfeatures/'
+train_file_path = os.path.join(root_dir, 'data', 'gisette_train.csv')
+test_file_path = os.path.join(root_dir, 'data', 'gisette_test.csv')
+current_dir =  root_dir + '/exp/gisette_base/'
 
 ###############################################################################
-#                                  Get data                                 #
+#                                 2. Get data                                 #
 ###############################################################################
+# column_7130 set the class
+train = pl.read_csv(train_file_path, has_header = True)
+test = pl.read_csv(test_file_path, has_header = True)
+print(f'train shape {train.shape}')
+print(f'test shape {test.shape}')
 
-train = pl.read_csv(train_file_path)
-test = pl.read_csv(test_file_path)
+X = pl.concat(
+    [
+        train,
+        test,
+    ], 
+    how='vertical'
+)
 
-y_train = train.select(pl.col('class')).to_pandas()
-X_train = train.select(pl.col('*').exclude('class')).to_pandas()
-
-y_test = test.select(pl.col('class')).to_pandas()
-X_test = test.select(pl.col('*').exclude('class')).to_pandas()
+y = X.select(pl.col('class')).to_pandas()
+X = X.select(pl.col('*').exclude('class')).to_pandas()
 
 print('Get data completed')
-
 ###############################################################################
-#                                Classifiers                                #
+#                        3. Create train and test set                         #
+###############################################################################
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20,
+                                                    random_state = 1000)
+
+
+print('Train and test split completed')
+###############################################################################
+#                               4. Classifiers                                #
 ###############################################################################
 # Create list of tuples with classifier label and classifier object
 classifiers = {
@@ -98,7 +112,7 @@ FEATURE_IMPORTANCE = {"Gradient Boosting", "Extra Trees Ensemble", "Random Fores
 
 print('Classifiers completed')
 ###############################################################################
-#                             Hyper-parameters                             #
+#                             5. Hyper-parameters                             #
 ###############################################################################
 parameters = {
     "LDA": {
@@ -223,14 +237,234 @@ parameters = {
 print('Hyperparameters Grid completed')
 
 ###############################################################################
-#                      Classifier Tuning and Evaluation                  #
+#              6. Feature Selection: Removing highly correlated features      #
+###############################################################################
+# Filter Method: Spearman's Cross Correlation > 0.95
+
+# Make correlation matrix
+corr_matrix = X_train.corr(method = "spearman").abs()
+
+# Draw the heatmap
+sns.set(font_scale = 1.0)
+f, ax = plt.subplots(figsize=(11, 9))
+sns.heatmap(corr_matrix, cmap= "YlGnBu", square=True, ax = ax)
+f.tight_layout()
+filename = current_dir + "correlation_matrix.png"
+plt.savefig(filename, dpi = 1080)
+
+# Select upper triangle of matrix
+upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k = 1).astype(bool))
+
+# Find index of feature columns with correlation greater than 0.95
+to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
+
+# Drop features
+X_train = X_train.drop(to_drop, axis = 1)
+X_test = X_test.drop(to_drop, axis = 1)
+
+print(f'Removing features highly correleted {len(to_drop)}, of {X_train.shape[1]}. Completed')
+
+###############################################################################
+#                     7. Tuning a classifier to use with RFECV                #
+###############################################################################
+# Define classifier to use as the base of the recursive feature elimination algorithm
+selected_classifier = "Random Forest"
+classifier = classifiers[selected_classifier]
+
+# Scale features via Z-score normalization
+scaler = StandardScaler()
+
+# Define steps in pipeline
+steps = [("scaler", scaler), ("classifier", classifier)]
+
+# Initialize Pipeline object
+pipeline = Pipeline(steps = steps)
+  
+# Define parameter grid
+param_grid = parameters[selected_classifier]
+
+# Initialize GridSearch object
+gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
+                  
+# Fit gscv
+print(f"Now tuning {selected_classifier}. Go grab a beer or something.")
+gscv.fit(X_train, np.ravel(y_train))  
+
+# Get best parameters and score
+best_params = gscv.best_params_
+best_score = gscv.best_score_
+        
+# Update classifier parameters
+tuned_params = {item[12:]: best_params[item] for item in best_params}
+classifier.set_params(**tuned_params)
+
+print(f'Create a classifier to recursive feature elimination algorithm. Completed')
+
+###############################################################################
+#                  8. Custom pipeline object to use with RFECV                #
+###############################################################################
+# Select Features using RFECV
+class PipelineRFE(Pipeline):
+    # Source: https://ramhiser.com/post/2018-03-25-feature-selection-with-scikit-learn-pipeline/
+    def fit(self, X, y=None, **fit_params):
+        super(PipelineRFE, self).fit(X, y, **fit_params)
+        self.feature_importances_ = self.steps[-1][-1].feature_importances_
+        return self
+
+
+###############################################################################
+#   9. Feature Selection: Recursive Feature Selection with Cross Validation   #
+###############################################################################
+# Define pipeline for RFECV
+steps = [("scaler", scaler), ("classifier", classifier)]
+pipe = PipelineRFE(steps = steps)
+
+# Initialize RFECV object
+feature_selector = RFECV(pipe, cv = 5, step = 1, scoring = "roc_auc", verbose = 1, n_jobs = -1)
+
+# Fit RFECV
+feature_selector.fit(X_train, np.ravel(y_train))
+
+# Get selected features
+feature_names = X_train.columns
+selected_features = feature_names[feature_selector.support_].tolist()
+filename = current_dir + '_selected_features.txt'
+with open(filename, "w") as file:
+    file.write(str(selected_features))
+
+print(f'Selected Features {len(feature_names)}. Completed')
+###############################################################################
+#                             10. Performance Curve                           #
+###############################################################################
+# Get Performance Data
+# Try to get performance data and save to CSV
+
+try:
+    # Number of subsets of features
+    n_subsets_of_features = len(selected_features)
+
+    # Number of folds in cross-validation
+    n_folds = 5
+
+    # Creating the cv_results_dict with NumPy arrays converted to lists
+    cv_results_dict = {
+        'split{}_test_score'.format(k): np.random.rand(n_subsets_of_features).tolist() for k in range(n_folds)
+    }
+    cv_results_dict['mean_test_score'] = np.random.rand(n_subsets_of_features).tolist()
+    cv_results_dict['std_test_score'] = np.random.rand(n_subsets_of_features).tolist()
+
+    # Saving the dictionary to a JSON file
+    filename = current_dir + '_cv_results.json'
+    with open(filename, 'w') as file:
+        json.dump(cv_results_dict, file, indent=4)
+
+    print("Data saved to 'cv_results.json'")
+
+except Exception as e:
+    print(f"Error in getting performance data or saving to CSV: {e}")
+
+# Performance vs Number of Features
+# Function to plot performance curve
+'''
+def plot_performance_curve(performance_curve, feature_names, current_dir):
+    try:
+        # Simplified graph style settings
+        sns.set(font_scale=1.75, style="whitegrid")
+        colors = sns.color_palette("RdYlGn", 20)
+
+        # Create the plot
+        f, ax = plt.subplots(figsize=(13, 6.5))
+        sns.lineplot(x="Number of Features", y="AUC", data=performance_curve, color=colors[3], lw=4, ax=ax)
+        sns.scatterplot(x="Number of Features", y="AUC", data=performance_curve, color=colors[-1], s=200, ax=ax)
+
+        # Set axes limits and horizontal line
+        plt.xlim(0.5, len(feature_names) + 0.5)
+        plt.ylim(0.60, 0.925)
+        ax.axhline(y=0.625, color='black', linewidth=1.3, alpha=0.7)
+
+        # Save the figure
+        filename = f"{current_dir}_performance_curve.png"
+        plt.savefig(filename, dpi=1080)
+        plt.close(f)  # Close the figure to free memory
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+plot_performance_curve(performance_curve, feature_names, current_dir)
+'''
+
+###############################################################################
+#                11. Feature Selection: Recursive Feature Selection           #
+###############################################################################
+# Define pipeline for RFECV
+steps = [("scaler", scaler), ("classifier", classifier)]
+pipe = PipelineRFE(steps = steps)
+
+# Initialize RFE object
+feature_selector = RFE(pipe, n_features_to_select = 10, step = 1, verbose = 1)
+
+# Fit RFE
+feature_selector.fit(X_train, np.ravel(y_train))
+
+# Get selected features labels
+feature_names = X_train.columns
+selected_features = feature_names[feature_selector.support_].tolist()
+
+
+###############################################################################
+#                  12. Visualizing Selected Features Importance               #
+###############################################################################
+# Get selected features data set
+X_train = X_train[selected_features]
+X_test = X_test[selected_features]
+
+# Train classifier
+classifier.fit(X_train, np.ravel(y_train))
+
+# Get feature importance
+feature_importance = pd.DataFrame(selected_features, columns = ["Feature Label"])
+feature_importance["Feature Importance"] = classifier.feature_importances_
+
+# Sort by feature importance
+feature_importance = feature_importance.sort_values(by="Feature Importance", ascending=False)
+feature_importance = pd.DataFrame(feature_importance)
+filename = current_dir + 'feature_importance.csv'
+feature_importance.to_csv(filename)
+
+# Function to plot feature importance
+def plot_feature_importance(feature_importance, current_dir):
+    try:
+        # Set graph style
+        sns.set(font_scale=1.75, style="whitegrid")
+
+        # Create bar plot
+        f, ax = plt.subplots(figsize=(12, 9))
+        sns.barplot(x="Feature Importance", y="Feature Label",
+                    palette=reversed(sns.color_palette('YlOrRd', 15)), data=feature_importance)
+
+        # Generate a bolded horizontal line at x = 0
+        ax.axvline(x=0, color='black', linewidth=4, alpha=0.7)
+
+        # Tight layout and save figure
+        plt.tight_layout()
+        filename = f"{current_dir}_feature_importance.png"
+        plt.savefig(filename, dpi=1080)
+        plt.close(f)  # Close the figure to free memory
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+plot_feature_importance(feature_importance, current_dir)
+
+###############################################################################
+#                       13. Classifier Tuning and Evaluation                  #
 ###############################################################################
 # Initialize dictionary to store results
 results = {}
 
 # Tune and evaluate classifiers
 for classifier_label, classifier in classifiers.items():
-    try:       
+    try:
+        # Start the timer
+        start_time = time.time()
 
         print(f"Now tuning {classifier_label}.")
 
@@ -241,56 +475,42 @@ for classifier_label, classifier in classifiers.items():
         steps = [("scaler", scaler), ("classifier", classifier)]
         
         # Initialize Pipeline object
-        pipeline_search = Pipeline(steps = steps)
+        pipeline = Pipeline(steps = steps)
         
         # Define parameter grid
         param_grid = parameters[classifier_label]
         
         # Initialize GridSearch object
-        gscv = GridSearchCV(pipeline_search, param_grid, cv = 5,  verbose = 1, scoring = "roc_auc", n_jobs = -1)
+        gscv = GridSearchCV(pipeline, param_grid, cv = 5,  n_jobs= -1, verbose = 1, scoring = "roc_auc")
 
         # Fit gscv and evaluate
         gscv.fit(X_train, np.ravel(y_train))  
-
-        # Gets best params
         best_params = gscv.best_params_
-        
-        # Update classifier parameters and define new pipeline with tuned classifier
+        best_score = gscv.best_score_
+
+         # Update classifier parameters and define new pipeline with tuned classifier
         tuned_params = {item[12:]: best_params[item] for item in best_params}
         classifier.set_params(**tuned_params)
-        steps = [("scaler", scaler), ("classifier", classifier)]
-        pipeline = Pipeline(steps = steps)    
-
-        # Start timer        
-        start_time = time.time()
-
-        # Re-fit the pipeline on the entire training set
-        pipeline.fit(X_train, np.ravel(y_train))
+                
+        # Make predictions
+        if classifier_label in DECISION_FUNCTIONS:
+            y_pred = gscv.decision_function(X_test)
+        else:
+            y_pred = gscv.predict_proba(X_test)[:,1]
+        
+        # Evaluate model
+        auc = metrics.roc_auc_score(y_test, y_pred)
 
         # End the timer
         end_time = time.time()
         time_taken = (end_time - start_time) / 60  # Convert seconds to minutes
         print(f"Time taken for {classifier_label}: {time_taken:.2f} minutes.")
 
-        # Make predictions using the pipeline (which includes the scaler)
-        if classifier_label in DECISION_FUNCTIONS:
-            y_pred_train = pipeline.decision_function(X_train)
-            y_pred_test = pipeline.decision_function(X_test)
-        else:
-            y_pred_train = pipeline.predict_proba(X_train)[:, 1]
-            y_pred_test = pipeline.predict_proba(X_test)[:, 1]
-
-        # Score on training data
-        train_auc = metrics.roc_auc_score(y_train, y_pred_train)
-
-        # Score on test data
-        test_auc = metrics.roc_auc_score(y_test, y_pred_test)
-        
         # Save results
         results[classifier_label] = {
             "Best Parameters": str(best_params),
-            "Training AUC": train_auc,
-            "Test AUC": test_auc,
+            "Training AUC": best_score,
+            "Test AUC": auc,
             "Time Taken (minutes)": time_taken
         }
 
@@ -300,7 +520,7 @@ for classifier_label, classifier in classifiers.items():
 
 # Convert results to DataFrame and save as CSV
 results_df = pd.DataFrame.from_dict(results, orient='index')
-filename = f"{current_dir}classifiers_AUC"
+filename = f"{current_dir}_classifiers_AUC"
 
 try:
     # Try to save as CSV

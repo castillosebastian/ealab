@@ -46,22 +46,22 @@ def find_root_dir():
 
 root_dir = find_root_dir()
 
-train_file_path = os.path.join(root_dir, 'data', 'madelon_train.csv')
-test_file_path = os.path.join(root_dir, 'data', 'madelon_test.csv')
-current_dir =  root_dir + '/exp/madelon_base_allfeatures/'
+train_file_path = os.path.join(root_dir, 'data', 'leuk_train.csv')
+test_file_path = os.path.join(root_dir, 'data', 'leuk_test.csv')
+current_dir =  root_dir + '/exp/leukemia_base_allfeatures/'
 
 ###############################################################################
 #                                  Get data                                 #
 ###############################################################################
 
-train = pl.read_csv(train_file_path)
-test = pl.read_csv(test_file_path)
+train = pl.read_csv(train_file_path, has_header = False)
+test = pl.read_csv(test_file_path, has_header = False)
 
-y_train = train.select(pl.col('class')).to_pandas()
-X_train = train.select(pl.col('*').exclude('class')).to_pandas()
+y_train = train.select(pl.col('column_7130')).to_pandas()
+X_train = train.select(pl.col('*').exclude('column_7130')).to_pandas()
 
-y_test = test.select(pl.col('class')).to_pandas()
-X_test = test.select(pl.col('*').exclude('class')).to_pandas()
+y_test = test.select(pl.col('column_7130')).to_pandas()
+X_test = test.select(pl.col('*').exclude('column_7130')).to_pandas()
 
 print('Get data completed')
 
@@ -255,9 +255,11 @@ for classifier_label, classifier in classifiers.items():
         # Gets best params
         best_params = gscv.best_params_
         
-        # Update classifier parameters and define new pipeline with tuned classifier
+        # Update classifier parameters 
         tuned_params = {item[12:]: best_params[item] for item in best_params}
-        classifier.set_params(**tuned_params)
+        classifier.set_params(**tuned_params) # 0verriding previous parameter values passed 
+
+        # Define new pipeline with tuned classifier
         steps = [("scaler", scaler), ("classifier", classifier)]
         pipeline = Pipeline(steps = steps)    
 
@@ -267,7 +269,7 @@ for classifier_label, classifier in classifiers.items():
         # Re-fit the pipeline on the entire training set
         pipeline.fit(X_train, np.ravel(y_train))
 
-        # End the timer
+        # End timer
         end_time = time.time()
         time_taken = (end_time - start_time) / 60  # Convert seconds to minutes
         print(f"Time taken for {classifier_label}: {time_taken:.2f} minutes.")
