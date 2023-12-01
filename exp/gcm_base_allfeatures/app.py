@@ -23,6 +23,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
+from sklearn import metrics
+from sklearn.metrics import f1_score, accuracy_score, make_scorer
 import time  # Import the time module
 
 # Classifiers
@@ -46,9 +48,9 @@ def find_root_dir():
 
 root_dir = find_root_dir()
 
-train_file_path = os.path.join(root_dir, 'data', 'gisette_train.csv')
-test_file_path = os.path.join(root_dir, 'data', 'gisette_test.csv')
-current_dir =  root_dir + '/exp/gisette_base_allfeatures/'
+train_file_path = os.path.join(root_dir, 'data', 'gcm_train.csv')
+test_file_path = os.path.join(root_dir, 'data', 'gcm_test.csv')
+current_dir =  root_dir + '/exp/gcm_base_allfeatures/'
 
 ###############################################################################
 #                                  Get data                                 #
@@ -66,28 +68,22 @@ X_test = test.select(pl.col('*').exclude('class')).to_pandas()
 print('Get data completed')
 
 ###############################################################################
-#                                Classifiers                                #
+#                               4. Classifiers                                #
 ###############################################################################
 # Create list of tuples with classifier label and classifier object
-classifiers = {
-    "LDA": LinearDiscriminantAnalysis(),
-    "QDA": QuadraticDiscriminantAnalysis(),
-    "AdaBoost": AdaBoostClassifier(),
-    "Bagging": BaggingClassifier(),
-    "Extra Trees Ensemble": ExtraTreesClassifier(),
-    "Gradient Boosting": GradientBoostingClassifier(),
-    "Random Forest": RandomForestClassifier(),
-    "Ridge": RidgeClassifier(),
-    "SGD": SGDClassifier(),
-    "BNB": BernoulliNB(),
-    "GNB": GaussianNB(),
-    "KNN": KNeighborsClassifier(),
+# Update the classifiers dictionary for multi-class classification
+# Selected classifiers based on the posibility of class weight balanced!
+classifiers = { 
+    "Gradient Boosting": GradientBoostingClassifier(),   
+    "Extra Trees Ensemble": ExtraTreesClassifier(class_weight='balanced'),    
+    "Random Forest": RandomForestClassifier(class_weight='balanced'),   
+    "SGD": SGDClassifier(class_weight='balanced'),
+    "LSVC": LinearSVC(class_weight='balanced'),
+    "NuSVC": NuSVC(class_weight='balanced', decision_function_shape='ovo'),
+    "SVC": SVC(class_weight='balanced', decision_function_shape='ovo'),
+    "DTC": DecisionTreeClassifier(class_weight='balanced'),
+    "ETC": ExtraTreeClassifier(class_weight='balanced'),
     "MLP": MLPClassifier(),
-    "LSVC": LinearSVC(),
-    "NuSVC": NuSVC(),
-    "SVC": SVC(),
-    "DTC": DecisionTreeClassifier(),
-    "ETC": ExtraTreeClassifier()
 }
 
 # Create dict of decision function labels
@@ -98,26 +94,10 @@ FEATURE_IMPORTANCE = {"Gradient Boosting", "Extra Trees Ensemble", "Random Fores
 
 print('Classifiers completed')
 ###############################################################################
-#                             Hyper-parameters                             #
+#                             5. Hyper-parameters                             #
 ###############################################################################
+# Defining the hyperparameter spaces for the specified machine learning models
 parameters = {
-    "LDA": {
-        "classifier__solver": ["svd"]
-    },
-    "QDA": {
-        "classifier__reg_param": [0.01 * ii for ii in range(0, 101)]
-    },
-    "AdaBoost": {
-        "classifier__estimator": [DecisionTreeClassifier(max_depth=ii) for ii in range(1, 6)],
-        "classifier__n_estimators": [200],
-        "classifier__learning_rate": [0.001, 0.01, 0.05, 0.1, 0.25, 0.50, 0.75, 1.0]
-    },
-    "Bagging": {
-        "classifier__estimator": [DecisionTreeClassifier(max_depth=ii) for ii in range(1, 6)],
-        "classifier__n_estimators": [200],
-        "classifier__max_features": [0.2, 0.4, 0.6, 0.8, 0.9, 1.0],
-        "classifier__n_jobs": [-1]
-    },
     # Update dict with Gradient Boosting
     "Gradient Boosting": { 
                             "classifier__learning_rate":[0.15,0.1,0.01,0.001], 
@@ -128,95 +108,84 @@ parameters = {
                             "classifier__max_features": [ "sqrt", "log2"],
                             "classifier__subsample": [0.8, 0.9, 1]
     },
-    # Update dict with Extra Trees
+
     "Extra Trees Ensemble": { 
-                            "classifier__n_estimators": [200],
-                            "classifier__class_weight": [None, "balanced"],
-                            "classifier__max_features": [ "sqrt", "log2"],
-                            "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
-                            "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-                            "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                            "classifier__criterion" :["gini", "entropy"],
-                            "classifier__n_jobs": [-1]
+        "classifier__n_estimators": [100, 200, 300],
+        "classifier__class_weight": [None, "balanced"],
+        "classifier__max_features": ["sqrt", "log2", None],
+        "classifier__max_depth": [None, 5, 10, 15],
+        "classifier__min_samples_split": [2, 5, 10],
+        "classifier__min_samples_leaf": [1, 2, 4],
+        "classifier__criterion": ["gini", "entropy"],
+        "classifier__n_jobs": [-1]
     },
-    # Update dict with Random Forest Parameters
+
     "Random Forest": { 
-                        "classifier__n_estimators": [200],
-                        "classifier__class_weight": [None, "balanced"],
-                        "classifier__max_features": [ "sqrt", "log2"],
-                        "classifier__max_depth" : [3, 4, 5, 6, 7, 8],
-                        "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-                        "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
-                        "classifier__criterion" :["gini", "entropy"]     ,
-                        "classifier__n_jobs": [-1]
+        "classifier__n_estimators": [100, 200, 300],
+        "classifier__class_weight": [None, "balanced"],
+        "classifier__max_features": ["sqrt", "log2", None],
+        "classifier__max_depth": [None, 5, 10, 15],
+        "classifier__min_samples_split": [2, 5, 10],
+        "classifier__min_samples_leaf": [1, 2, 4],
+        "classifier__criterion": ["gini", "entropy"],
+        "classifier__n_jobs": [-1]
     },
-    # Update dict with Ridge
-    "Ridge": { 
-                "classifier__alpha": [1e-7, 1e-5, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
-    },
-    # Update dict with SGD Classifier
+
     "SGD": { 
-            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0],
-            "classifier__penalty": ["l1", "l2"],
-            "classifier__n_jobs": [-1]
+        "classifier__loss": ['hinge', 'log_loss', 'modified_huber', 'squared_hinge', 'perceptron'],
+        "classifier__alpha": [1e-7, 1e-5, 1e-3, 1e-2, 1e-1],
+        "classifier__penalty": ['l2', 'l1', 'elasticnet'],
+        "classifier__learning_rate": ['constant', 'optimal', 'invscaling', 'adaptive'],
+        "classifier__eta0": [0.001, 0.01, 0.1],
+        "classifier__n_jobs": [-1]
     },
-    # Update dict with BernoulliNB Classifier
-    "BNB": { 
-            "classifier__alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1.0]
-    },
-    # Update dict with GaussianNB Classifier
-    "GNB": { 
-            "classifier__var_smoothing": [1e-9, 1e-8,1e-7, 1e-6, 1e-5]
-    },
-    # Update dict with K Nearest Neighbors Classifier
-    "KNN": { 
-            "classifier__n_neighbors": list(range(1,31)),
-            "classifier__p": [1, 2, 3, 4, 5],
-            "classifier__leaf_size": [5, 10, 20, 30, 40, 50],
-            "classifier__n_jobs": [-1]
-    },
-    # Update dict with MLPClassifier
-    "MLP": { 
-            "classifier__hidden_layer_sizes": [(5,5), (10,10), (5,5,5), (10,10,10)],
-            "classifier__activation": ["identity", "logistic", "tanh", "relu"],
-            "classifier__learning_rate": ["constant", "invscaling", "adaptive"],
-            "classifier__max_iter": [500, 1000, 2000],
-            "classifier__alpha": list(10.0 ** -np.arange(1, 10)),
-    },
+
     "LSVC": { 
-            "classifier__penalty": ["l2"],
-            "classifier__C": [0.0001, 0.01, 0.1, 1.0, 10, 100]
+        "classifier__penalty": ['l2'],
+        "classifier__loss": ['hinge', 'squared_hinge'],
+        "classifier__C": [0.01, 0.1, 1, 10, 100],
+        "classifier__dual": [True, False],
+        "classifier__max_iter": [1000, 2000, 5000]
     },
     "NuSVC": { 
-            "classifier__nu": [0.25, 0.50, 0.75],
-            "classifier__kernel": ["linear", "rbf", "poly"],
-            "classifier__degree": [1,3,5,6],
+        "classifier__nu": [0.25, 0.5, 0.75],
+        "classifier__kernel": ['linear', 'rbf', 'poly'],
+        "classifier__degree": [2, 3, 4],
+        "classifier__gamma": ['scale', 'auto'],
+        "classifier__coef0": [0.0, 0.5, 1.0]
     },
     "SVC": { 
-            "classifier__kernel": ["linear", "rbf", "poly"],
-            "classifier__gamma": ["auto"],
-            "classifier__C": [0.1, 0.5, 1, 10, 50, 100],
-            "classifier__degree": [1, 3, 5, 6]
+        "classifier__C": [0.1, 1, 10, 100],
+        "classifier__kernel": ['linear', 'rbf', 'poly'],
+        "classifier__degree": [2, 3, 4],
+        "classifier__gamma": ['scale', 'auto'],
+        "classifier__coef0": [0.0, 0.5, 1.0]
     },
-    # Update dict with Decision Tree Classifier
+
     "DTC": { 
-            "classifier__criterion" :["gini", "entropy"],
-            "classifier__splitter": ["best", "random"],
-            "classifier__class_weight": [None, "balanced"],
-            "classifier__max_features": [ "sqrt", "log2"],
-            "classifier__max_depth" : [1,2,3, 4, 5, 6, 7, 8],
-            "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-            "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10],
+        "classifier__criterion": ['gini', 'entropy'],
+        "classifier__splitter": ['best', 'random'],
+        "classifier__max_depth": [None, 5, 10, 15],
+        "classifier__min_samples_split": [2, 5, 10],
+        "classifier__min_samples_leaf": [1, 2, 4],
+        "classifier__max_features": ['sqrt', 'log2', None]
     },
-    # randomized decision trees: a.k.a. extra-trees
-    "ETC": {
-        "classifier__criterion": ["gini", "entropy"],
-        "classifier__splitter": ["best", "random"],
-        "classifier__class_weight": [None, "balanced"],
-        "classifier__max_features": ["sqrt", "log2"],
-        "classifier__max_depth": [1, 3, 5, 7, 8],
-        "classifier__min_samples_split": [0.005, 0.01, 0.05, 0.10],
-        "classifier__min_samples_leaf": [0.005, 0.01, 0.05, 0.10]
+    "ETC": { 
+        "classifier__criterion": ['gini', 'entropy'],
+        "classifier__splitter": ['random', 'best'],
+        "classifier__max_depth": [None, 5, 10, 15],
+        "classifier__min_samples_split": [2, 5, 10],
+        "classifier__min_samples_leaf": [1, 2, 4],
+        "classifier__max_features": ['sqrt', 'log2', None]
+    },
+    "MLP": { 
+        "classifier__hidden_layer_sizes": [(50,40), (100,80), (50, 50), (100, 100)],
+        "classifier__activation": ['identity', 'tanh', 'relu'],
+        "classifier__solver": ['lbfgs', 'sgd', 'adam'],
+        "classifier__alpha": [0.0001, 0.001, 0.01],
+        "classifier__learning_rate": ['constant', 'invscaling', 'adaptive'],
+        "classifier__max_iter": [200, 400, 800],
+        "classifier__learning_rate_init": [0.001, 0.01, 0.1]
     }
 }
 
@@ -246,8 +215,12 @@ for classifier_label, classifier in classifiers.items():
         # Define parameter grid
         param_grid = parameters[classifier_label]
         
-        # Initialize GridSearch object
-        gscv = GridSearchCV(pipeline_search, param_grid, cv = 5,  verbose = 1, scoring = "roc_auc", n_jobs = -1)
+        # Custom scorer for multi-class
+        f1_weighted_scorer = make_scorer(f1_score, average='weighted')
+
+        # Initialize RandomizedSearchCV object with a multi-class compatible scorer
+        # Adjust n_iter to control the number of parameter settings sampled
+        gscv = GridSearchCV(pipeline, param_grid, cv=5, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer)  
 
         # Fit gscv and evaluate
         gscv.fit(X_train, np.ravel(y_train))  
@@ -281,18 +254,21 @@ for classifier_label, classifier in classifiers.items():
         else:
             y_pred_train = pipeline.predict_proba(X_train)[:, 1]
             y_pred_test = pipeline.predict_proba(X_test)[:, 1]
+             
+        # Evaluate model
+        train_f1_score = f1_score(y_train, y_pred_train, average='weighted')
+        train_accuracy = accuracy_score(y_train, y_pred_train)
 
-        # Score on training data
-        train_auc = metrics.roc_auc_score(y_train, y_pred_train)
-
-        # Score on test data
-        test_auc = metrics.roc_auc_score(y_test, y_pred_test)
-        
+        test_f1_score = f1_score(y_test, y_pred_test, average='weighted')
+        test_accuracy = accuracy_score(y_test, y_pred_test)
+                
         # Save results
         results[classifier_label] = {
-            "Best Parameters": str(best_params),
-            "Training AUC": train_auc,
-            "Test AUC": test_auc,
+            "Best Parameters": str(best_params),     
+            "Training F1-Score": train_f1_score,    
+            "Train Accuracy": train_accuracy,   
+            "Test F1-Score": test_f1_score,
+            "Test Accuracy": test_accuracy,
             "Time Taken (minutes)": time_taken
         }
 
@@ -324,30 +300,26 @@ except Exception as e:
 ###############################################################################
 #                              14. Visualing Results                          #
 ###############################################################################
-# Initialize auc_score dictionary
-auc_scores = {
-              "Classifier": [],
-              "AUC": [],
-              "AUC Type": []
-              }
+# Initialize f1_score dictionary
+f1_scores = {
+    "Classifier": [],
+    "F1 Score": [],
+    "F1 Score Type": []
+}
 
-# Get AUC scores into dictionary
+# Get F1 scores into the dictionary
 for classifier_label in results:
-    auc_scores.update({"Classifier": [classifier_label] + auc_scores["Classifier"],
-                       "AUC": [results[classifier_label]["Training AUC"]] + auc_scores["AUC"],
-                       "AUC Type": ["Training"] + auc_scores["AUC Type"]})
-    
-    auc_scores.update({"Classifier": [classifier_label] + auc_scores["Classifier"],
-                       "AUC": [results[classifier_label]["Test AUC"]] + auc_scores["AUC"],
-                       "AUC Type": ["Test"] + auc_scores["AUC Type"]})
+    f1_scores["Classifier"].extend([classifier_label, classifier_label])
+    f1_scores["F1 Score"].extend([results[classifier_label]["Training F1-Score"], results[classifier_label]["Test F1-Score"]])
+    f1_scores["F1 Score Type"].extend(["Training", "Test"])
 
-# Dictionary to PandasDataFrame
-auc_scores = pd.DataFrame(auc_scores)
-filename = current_dir + 'auc_scores.csv'
-auc_scores.to_csv(filename)
+# Dictionary to Pandas DataFrame
+f1_scores_df = pd.DataFrame(f1_scores)
+filename = current_dir + 'f1_scores.csv'
+f1_scores_df.to_csv(filename)
 
-# Function to plot AUC scores
-def plot_auc_scores(auc_scores, current_dir):
+# Function to plot F1 scores
+def plot_f1_scores(f1_scores_df, current_dir):
     try:
         # Set graph style
         sns.set(font_scale=1.75, style="whitegrid")
@@ -359,17 +331,17 @@ def plot_auc_scores(auc_scores, current_dir):
 
         # Create bar plot
         f, ax = plt.subplots(figsize=(12, 9))
-        sns.barplot(x="AUC", y="Classifier", hue="AUC Type", palette=colors, data=auc_scores)
+        sns.barplot(x="F1 Score", y="Classifier", hue="F1 Score Type", palette=colors, data=f1_scores_df)
 
         # Generate a bolded horizontal line at x = 0
         ax.axvline(x=0, color='black', linewidth=4, alpha=0.7)
 
         # Tight layout and save figure
         plt.tight_layout()
-        filename = f"{current_dir}_AUC_Scores.png"
+        filename = f"{current_dir}_F1_Scores.png"
         plt.savefig(filename, dpi=1080)
         plt.close(f)  # Close the figure to free memory
     except Exception as e:
         print(f"An error occurred: {e}")
 
-plot_auc_scores(auc_scores, current_dir)
+plot_f1_scores(f1_scores_df, current_dir)
