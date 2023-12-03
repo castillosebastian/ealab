@@ -373,3 +373,4 @@ def plot_auc_scores(auc_scores, current_dir):
         print(f"An error occurred: {e}")
 
 plot_auc_scores(auc_scores, current_dir)
+

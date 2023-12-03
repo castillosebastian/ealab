@@ -1,0 +1,21 @@
+,Best Parameters,Training AUC,Test AUC,Time Taken (minutes),Error
+LDA,{'classifier__solver': 'svd'},1.0,0.9642521752121855,0.16396957238515217,
+QDA,{'classifier__reg_param': 0.0},1.0,0.7044743919010251,0.06577893098195393,
+AdaBoost,"{'classifier__estimator': DecisionTreeClassifier(max_depth=3), 'classifier__learning_rate': 0.5, 'classifier__n_estimators': 200}",1.0,0.9938047360220829,2.340587294101715,
+Extra Trees Ensemble,"{'classifier__class_weight': None, 'classifier__criterion': 'entropy', 'classifier__max_depth': 8, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.005, 'classifier__n_estimators': 200, 'classifier__n_jobs': -1}",0.9937078030179067,0.9877935558227389,0.01763395071029663,
+Gradient Boosting,"{'classifier__learning_rate': 0.15, 'classifier__max_depth': 4, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.01, 'classifier__min_samples_split': 0.05, 'classifier__n_estimators': 200, 'classifier__subsample': 0.9}",1.0,0.9955095118845197,0.04271883169809977,
+Random Forest,"{'classifier__class_weight': 'balanced', 'classifier__criterion': 'entropy', 'classifier__max_depth': 8, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.005, 'classifier__n_estimators': 200, 'classifier__n_jobs': -1}",0.9941644552898742,0.9873720306486152,0.023851287364959717,
+Ridge,{'classifier__alpha': 1.0},1.0,0.970669317947368,0.012793898582458496,
+SGD,"{'classifier__alpha': 0.5, 'classifier__n_jobs': -1, 'classifier__penalty': 'l2'}",1.0,0.992791385946315,0.009032114346822103,
+BNB,{'classifier__alpha': 1e-06},0.9525108315962465,0.9381276189696999,0.007565899689992269,
+GNB,{'classifier__var_smoothing': 1e-05},0.9092589249507332,0.8529081679840069,0.006975158055623373,
+KNN,"{'classifier__leaf_size': 5, 'classifier__n_jobs': -1, 'classifier__n_neighbors': 11, 'classifier__p': 1}",0.9940550721750699,0.9879542956438843,0.004412301381429036,
+MLP,"{'classifier__activation': 'relu', 'classifier__alpha': 0.1, 'classifier__hidden_layer_sizes': (10, 10, 10), 'classifier__learning_rate': 'adaptive', 'classifier__max_iter': 500}",0.9993165778558776,0.9918433989513449,0.5859150091807047,
+LSVC,"{'classifier__C': 0.01, 'classifier__penalty': 'l2'}",1.0,0.9933605338607436,0.013175225257873536,
+NuSVC,"{'classifier__degree': 1, 'classifier__kernel': 'linear', 'classifier__nu': 0.25}",0.9994802078812757,0.9932684919714573,0.19715338548024494,
+SVC,"{'classifier__C': 0.1, 'classifier__degree': 1, 'classifier__gamma': 'auto', 'classifier__kernel': 'linear'}",1.0,0.9932867224905912,0.1132274309794108,
+DTC,"{'classifier__class_weight': 'balanced', 'classifier__criterion': 'entropy', 'classifier__max_depth': 6, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.005, 'classifier__min_samples_split': 0.01, 'classifier__splitter': 'best'}",0.9547934259858709,0.9213161901238609,0.003383008639017741,
+ETC,"{'classifier__class_weight': None, 'classifier__criterion': 'gini', 'classifier__max_depth': 8, 'classifier__max_features': 'sqrt', 'classifier__min_samples_leaf': 0.01, 'classifier__min_samples_split': 0.01, 'classifier__splitter': 'best'}",0.9539256977397713,0.9417414859029176,0.0032319903373718263,
+Bagging,,,,,"A worker process managed by the executor was unexpectedly terminated. This could be caused by a segmentation fault while calling the function or by an excessive memory usage causing the Operating System to kill the worker.
+
+The exit codes of the workers are {SIGKILL(-9), SIGKILL(-9), SIGKILL(-9)}"

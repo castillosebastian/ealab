@@ -26,6 +26,7 @@ from sklearn import metrics
 from sklearn import metrics
 from sklearn.metrics import f1_score, accuracy_score, make_scorer
 import time  # Import the time module
+from sklearn.metrics import classification_report
 
 # Classifiers
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
@@ -85,12 +86,6 @@ classifiers = {
     "ETC": ExtraTreeClassifier(class_weight='balanced'),
     "MLP": MLPClassifier(),
 }
-
-# Create dict of decision function labels
-DECISION_FUNCTIONS = {"Ridge", "SGD", "LSVC", "NuSVC", "SVC"}
-
-# Create dict for classifiers with feature_importances_ attribute
-FEATURE_IMPORTANCE = {"Gradient Boosting", "Extra Trees Ensemble", "Random Forest"}
 
 print('Classifiers completed')
 ###############################################################################
@@ -220,7 +215,7 @@ for classifier_label, classifier in classifiers.items():
 
         # Initialize RandomizedSearchCV object with a multi-class compatible scorer
         # Adjust n_iter to control the number of parameter settings sampled
-        gscv = GridSearchCV(pipeline, param_grid, cv=5, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer)  
+        gscv = GridSearchCV(pipeline_search, param_grid, cv=5, n_jobs=-1, verbose=1, scoring=f1_weighted_scorer)  
 
         # Fit gscv and evaluate
         gscv.fit(X_train, np.ravel(y_train))  
@@ -248,13 +243,9 @@ for classifier_label, classifier in classifiers.items():
         print(f"Time taken for {classifier_label}: {time_taken:.2f} minutes.")
 
         # Make predictions using the pipeline (which includes the scaler)
-        if classifier_label in DECISION_FUNCTIONS:
-            y_pred_train = pipeline.decision_function(X_train)
-            y_pred_test = pipeline.decision_function(X_test)
-        else:
-            y_pred_train = pipeline.predict_proba(X_train)[:, 1]
-            y_pred_test = pipeline.predict_proba(X_test)[:, 1]
-             
+        y_pred_train = pipeline.predict(X_train)
+        y_pred_test = pipeline.predict(X_test)
+                     
         # Evaluate model
         train_f1_score = f1_score(y_train, y_pred_train, average='weighted')
         train_accuracy = accuracy_score(y_train, y_pred_train)
@@ -271,6 +262,23 @@ for classifier_label, classifier in classifiers.items():
             "Test Accuracy": test_accuracy,
             "Time Taken (minutes)": time_taken
         }
+
+        # Save objetcs
+        fit_output = pipeline.named_steps['classifier'].__dict__
+        results_df = pd.DataFrame.from_dict(fit_output, orient='index')
+        filename = f"{current_dir}pipeline_output_obj"
+        # Generating classification report to save
+        report = classification_report(y_test, y_pred_test, output_dict=True)
+        filename_report = f"{current_dir}report_obj"
+
+        try:
+            # Try to save as CSV
+            results_df.to_csv(f"{filename}.csv")
+            report.to_csv(f"{filename_report}.csv")
+
+        except Exception as e:
+            print(f"Failed to save as CSV due to: {e}\nSaving as a TXT file.")
+
 
     except Exception as e:
         print(f"Error with classifier {classifier_label}: {e}")
