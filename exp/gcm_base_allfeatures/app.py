@@ -191,6 +191,8 @@ print('Hyperparameters Grid completed')
 ###############################################################################
 # Initialize dictionary to store results
 results = {}
+pipeline_out = {}
+report_out = {}
 
 # Tune and evaluate classifiers
 for classifier_label, classifier in classifiers.items():
@@ -261,23 +263,15 @@ for classifier_label, classifier in classifiers.items():
             "Test F1-Score": test_f1_score,
             "Test Accuracy": test_accuracy,
             "Time Taken (minutes)": time_taken
+        }     
+
+        pipeline_out[classifier_label] = {
+            'output' : pipeline.named_steps['classifier'].__dict__
         }
 
-        # Save objetcs
-        fit_output = pipeline.named_steps['classifier'].__dict__
-        results_df = pd.DataFrame.from_dict(fit_output, orient='index')
-        filename = f"{current_dir}pipeline_output_obj"
-        # Generating classification report to save
-        report = classification_report(y_test, y_pred_test, output_dict=True)
-        filename_report = f"{current_dir}report_obj"
-
-        try:
-            # Try to save as CSV
-            results_df.to_csv(f"{filename}.csv")
-            report.to_csv(f"{filename_report}.csv")
-
-        except Exception as e:
-            print(f"Failed to save as CSV due to: {e}\nSaving as a TXT file.")
+        report_out[classifier_label] = {
+            'output' : classification_report(y_test, y_pred_test, output_dict=True)
+        }
 
 
     except Exception as e:
@@ -304,6 +298,23 @@ except Exception as e:
             file.write("\n")
 
     print(f"Results saved as TXT in {filename}.txt")
+
+# Save objetcs
+results_df = pd.DataFrame.from_dict(pipeline_out, orient='index')
+filename = f"{current_dir}pipeline_output_obj"
+# Generating classification report to save
+report = pd.DataFrame.from_dict(report_out, orient='index')
+filename_report = f"{current_dir}report_obj"
+
+try:
+    # Try to save as CSV
+    results_df.to_csv(f"{filename}.csv")
+    report.to_csv(f"{filename_report}.csv")
+
+except Exception as e:
+    print(f"Failed to save as CSV due to: {e}\nSaving as a TXT file.")
+
+
 
 ###############################################################################
 #                              14. Visualing Results                          #
