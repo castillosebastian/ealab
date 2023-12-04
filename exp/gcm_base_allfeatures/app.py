@@ -254,7 +254,9 @@ for classifier_label, classifier in classifiers.items():
 
         test_f1_score = f1_score(y_test, y_pred_test, average='weighted')
         test_accuracy = accuracy_score(y_test, y_pred_test)
-                
+
+        print(f'train f1: {train_f1_score}'), print(f'test f1: {test_f1_score}')       
+
         # Save results
         results[classifier_label] = {
             "Best Parameters": str(best_params),     
