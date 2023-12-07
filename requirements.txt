@@ -16,3 +16,4 @@ skorch
 mlflow
 pyyaml
 bayesian-optimization
+torchvision
