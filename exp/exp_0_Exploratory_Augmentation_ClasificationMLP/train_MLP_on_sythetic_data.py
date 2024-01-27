@@ -4,30 +4,27 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import matplotlib.pyplot as plt
-import seaborn as sns
 import torch
-import torch.nn as nn
-from torch import optim
-from torch.optim import Adam
-from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
-from torchvision.utils import save_image, make_grid
-from mpl_toolkits.axes_grid1 import ImageGrid
-from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, f1_score, multilabel_confusion_matrix
 from scipy.io import arff
+import inspect
+import sys
+# Get the root directory of your project (the directory containing 'src' and 'plugins')
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
 
 # Set the device for PyTorch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 # Configure Polars
 pl.Config.set_tbl_rows(-1)
 
 # Original Data
-train, trameta = arff.loadarff('/home/sebacastillo/ealab/data/GCM_Training.arff')
-test, tstmeta = arff.loadarff('/home/sebacastillo/ealab/data/GCM_Test.arff')
+train, trameta = arff.loadarff('data/GCM_Training.arff')
+test, tstmeta = arff.loadarff('data/GCM_Test.arff')
 train = pl.from_numpy(train)
 test = pl.from_numpy(test)
 train_columns = train.columns
@@ -51,36 +48,29 @@ scale_test = scaler.transform(X_TEST)
 train_original = np.concatenate((scale_train, y_train.reshape(-1,1)), axis=1)  
 test_original = np.concatenate((scale_test, y_test.reshape(-1,1)), axis=1)  
 
+# Extract observation from train and add to test
+# num_samples = 40  # Example number
+# sample_indices = np.random.choice(train_original.shape[0], size=num_samples, replace=False)
+# sampled_data = train_original[sample_indices]
+# test_original = np.concatenate((test_original, sampled_data), axis=0)
+# train_original = np.delete(train_original, sample_indices, axis=0)
+
 # load sythetic
-X_syn = np.load("/home/sebacastillo/ealab/exp/exp_0_initialVAE/synthetic_data_list.npy", allow_pickle=True)
-y_syn = np.load("/home/sebacastillo/ealab/exp/exp_0_initialVAE/labels_list.npy", allow_pickle=True)
+X_syn = np.load("exp/exp_0_Exploratory_Augmentation_ClasificationMLP/synthetic_data_list.npy", allow_pickle=True)
+y_syn = np.load("exp/exp_0_Exploratory_Augmentation_ClasificationMLP/labels_list.npy", allow_pickle=True)
 # Reshape X_syn to 2D
 X_syn_reshaped = X_syn.reshape(-1, X_syn.shape[2])  # Shape will be (14*16, 16063)
 # Reshape y_syn to have the same number of rows as X_syn_reshaped
 y_syn_reshaped = y_syn.reshape(-1, 1)  # Shape will be (14*16, 1)
 # Join X_syn_reshaped and y_syn_reshaped
 train_syn = np.concatenate((X_syn_reshaped, y_syn_reshaped), axis=1)  # Shape will be (14*16, 16064)
-
 # Concatenate train_syn with train
 combined_train = np.concatenate((train_original, train_syn), axis=0)
 # Now combined_train has the combined data
 
-# Decide the number of samples you want to extract
-num_samples = 40  # Example number
-# Sample without replacement
-sample_indices = np.random.choice(combined_train.shape[0], size=num_samples, replace=False)
-
-# Extract the samples for augmentation
-sampled_data = combined_train[sample_indices]
-combined_test = np.concatenate((test_original, sampled_data), axis=0)
-
-# Remove the sampled observations from combined_train
-combined_train = np.delete(combined_train, sample_indices, axis=0)
-
-
 # Convert the NumPy array to a Pandas DataFrame
 train = pd.DataFrame(combined_train, columns=train_columns)
-test = pd.DataFrame(combined_test, columns=test_columns)
+test = pd.DataFrame(test_original, columns=test_columns)
 
 
 # Split

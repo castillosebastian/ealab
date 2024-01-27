@@ -3,20 +3,12 @@ import json
 import numpy as np
 import pandas as pd
 import polars as pl
-import matplotlib.pyplot as plt
-import seaborn as sns
-from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch import optim
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
 from torchvision.utils import save_image, make_grid
-from mpl_toolkits.axes_grid1 import ImageGrid
-from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, f1_score, multilabel_confusion_matrix
 from scipy.io import arff
 
