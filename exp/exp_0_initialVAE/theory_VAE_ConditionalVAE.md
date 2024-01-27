@@ -1,5 +1,7 @@
 # evaluate
 
+    important: https://sdv.dev/
+
     https://github.com/williamcfrancis/Variational-Autoencoder-for-MNIST/blob/main/VAE_Digit_Recognition.ipynb
 
 # conditional vae theory

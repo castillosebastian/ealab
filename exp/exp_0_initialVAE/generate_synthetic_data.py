@@ -178,20 +178,19 @@ for cancer_type in tqdm(unique_classes, desc="Processing Cancer Types"):
 
 # Saving the synthetic data list
 np.save('synthetic_data_list.npy', np.array(synthetic_data_list, dtype=object))
-
 # Saving the labels list
 np.save('labels_list.npy', np.array(labels_list, dtype=object))
 
 
-# combine data
-data = synthetic_data.numpy()
-num_rows = data.shape[0]
-labels = np.full((num_rows, 1), b'Lung', dtype=object)
+# combine data--------------------------------------------------------------------
+#data = synthetic_data.numpy()
+#num_rows = data.shape[0]
+#labels = np.full((num_rows, 1), b'Lung', dtype=object)
 # Combine the original array with the label column
 combined_data = np.column_stack((data, labels))
-np.save('syn_lung.npy', combined_data)
+#np.save('syn_lung.npy', combined_data)
 # torch.save(model, 'vae_lung_model.pth') # save all model and parameters
-torch.save(model.state_dict(), 'vae_lung_model_state_dict.pth')
+#torch.save(model.state_dict(), 'vae_lung_model_state_dict.pth')
 # Load model 
 #model = VAE(input_dim=16063, hidden_dim=400, latent_dim=200, device=device)
 #model.load_state_dict(torch.load('vae_model_state_dict.pth'))
