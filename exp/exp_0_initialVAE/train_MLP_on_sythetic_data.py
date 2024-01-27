@@ -65,9 +65,22 @@ train_syn = np.concatenate((X_syn_reshaped, y_syn_reshaped), axis=1)  # Shape wi
 combined_train = np.concatenate((train_original, train_syn), axis=0)
 # Now combined_train has the combined data
 
+# Decide the number of samples you want to extract
+num_samples = 40  # Example number
+# Sample without replacement
+sample_indices = np.random.choice(combined_train.shape[0], size=num_samples, replace=False)
+
+# Extract the samples for augmentation
+sampled_data = combined_train[sample_indices]
+combined_test = np.concatenate((test_original, sampled_data), axis=0)
+
+# Remove the sampled observations from combined_train
+combined_train = np.delete(combined_train, sample_indices, axis=0)
+
+
 # Convert the NumPy array to a Pandas DataFrame
 train = pd.DataFrame(combined_train, columns=train_columns)
-test = pd.DataFrame(test_original, columns=train_columns)
+test = pd.DataFrame(combined_test, columns=test_columns)
 
 
 # Split
