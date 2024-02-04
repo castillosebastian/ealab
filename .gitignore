@@ -5,3 +5,4 @@
 /exp/leukemia_base/correlation_matrix.png
 *.arff
 *.pth
+*.npy
