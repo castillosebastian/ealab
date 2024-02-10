@@ -17,3 +17,4 @@ mlflow
 pyyaml
 bayesian-optimization
 torchvision
+urllib3
