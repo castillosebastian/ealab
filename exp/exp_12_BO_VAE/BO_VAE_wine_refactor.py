@@ -1,0 +1,349 @@
+import optuna
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch import nn, optim
+from torch.autograd import Variable
+from torch.utils.data import Dataset, DataLoader
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+from sdmetrics import load_demo
+from sdmetrics.reports.single_table import QualityReport
+import json
+import plotly
+
+# Parameters----------------------------------------------------------------------
+root = '/home/sebacastillo/ealab/'
+DATA_PATH = root + 'data/wine.csv'
+exp_dir = root + "exp/exp_12_BO_VAE/"
+class_column = 'Wine'
+# BO
+n_trials = 10
+param_ranges = {
+    'hiden1': {'low': 100, 'high': 1000},
+    'hiden2': {'low': 50, 'high': 500},
+    'latent_dim': {'low': 5, 'high': 20},
+    'lr': {'low': 1e-5, 'high': 1e-3},
+    'epochs': {'low': 800, 'high': 4000}
+}
+# Sample to generate
+n_samples = 200
+# Evaluate
+show_quality_figs = False
+
+
+# Processsing-----------------------------------------------------------------------
+df_base = pd.read_csv(DATA_PATH, sep=',')
+cols = df_base.columns
+D_in = df_base.shape[1]
+
+def load_and_standardize_data(path):
+    # read in from csv
+    df = pd.read_csv(path, sep=',')
+    # replace nan with -99
+    df = df.fillna(-99)
+    df = df.values.reshape(-1, df.shape[1]).astype('float32')
+    # randomly split
+    X_train, X_test = train_test_split(df, test_size=0.3, random_state=42)
+    # standardize values
+    scaler = preprocessing.StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    return X_train, X_test, scaler, df
+
+class DataBuilder(Dataset):
+    def __init__(self, path, train=True):
+        self.X_train, self.X_test, self.standardizer, _ = load_and_standardize_data(DATA_PATH)
+        if train:
+            self.x = torch.from_numpy(self.X_train)
+            self.len=self.x.shape[0]
+        else:
+            self.x = torch.from_numpy(self.X_test)
+            self.len=self.x.shape[0]
+        del self.X_train
+        del self.X_test
+    def __getitem__(self,index):
+        return self.x[index]
+    def __len__(self):
+        return self.len
+
+traindata_set=DataBuilder(DATA_PATH, train=True)
+testdata_set=DataBuilder(DATA_PATH, train=False)
+trainloader=DataLoader(dataset=traindata_set,batch_size=1024)
+testloader=DataLoader(dataset=testdata_set,batch_size=1024)
+
+print(f'Loaded datasets: train: {type(trainloader.dataset.x)}, test: {type(testloader.dataset.x)}')
+print(f'Shapes of datasets: train: {trainloader.dataset.x.shape}, test: {testloader.dataset.x.shape}')
+
+class VAutoencoder(nn.Module):
+    def __init__(self,D_in,H=50,H2=12,latent_dim=3):
+
+        #Encoder
+        super(VAutoencoder,self).__init__()
+        self.linear1=nn.Linear(D_in,H)
+        self.lin_bn1 = nn.BatchNorm1d(num_features=H)
+        self.linear2=nn.Linear(H,H2)
+        self.lin_bn2 = nn.BatchNorm1d(num_features=H2)
+        self.linear3=nn.Linear(H2,H2)
+        self.lin_bn3 = nn.BatchNorm1d(num_features=H2)
+
+        # Latent vectors mu and sigma
+        self.fc1 = nn.Linear(H2, latent_dim)
+        self.bn1 = nn.BatchNorm1d(num_features=latent_dim)
+        self.fc21 = nn.Linear(latent_dim, latent_dim)
+        self.fc22 = nn.Linear(latent_dim, latent_dim)
+
+        # Sampling vector
+        self.fc3 = nn.Linear(latent_dim, latent_dim)
+        self.fc_bn3 = nn.BatchNorm1d(latent_dim)
+        self.fc4 = nn.Linear(latent_dim, H2)
+        self.fc_bn4 = nn.BatchNorm1d(H2)
+
+        # Decoder
+        self.linear4=nn.Linear(H2,H2)
+        self.lin_bn4 = nn.BatchNorm1d(num_features=H2)
+        self.linear5=nn.Linear(H2,H)
+        self.lin_bn5 = nn.BatchNorm1d(num_features=H)
+        self.linear6=nn.Linear(H,D_in)
+        self.lin_bn6 = nn.BatchNorm1d(num_features=D_in)
+
+        self.relu = nn.ReLU()
+
+    def encode(self, x):
+        lin1 = self.relu(self.lin_bn1(self.linear1(x)))
+        lin2 = self.relu(self.lin_bn2(self.linear2(lin1)))
+        lin3 = self.relu(self.lin_bn3(self.linear3(lin2)))
+
+        fc1 = F.relu(self.bn1(self.fc1(lin3)))
+
+        r1 = self.fc21(fc1)
+        r2 = self.fc22(fc1)
+
+        return r1, r2
+
+    def reparameterize(self, mu, logvar):
+        if self.training:
+            std = logvar.mul(0.5).exp_()
+            eps = Variable(std.data.new(std.size()).normal_())
+            return eps.mul(std).add_(mu)
+        else:
+            return mu
+
+    def decode(self, z):
+        fc3 = self.relu(self.fc_bn3(self.fc3(z)))
+        fc4 = self.relu(self.fc_bn4(self.fc4(fc3)))
+
+        lin4 = self.relu(self.lin_bn4(self.linear4(fc4)))
+        lin5 = self.relu(self.lin_bn5(self.linear5(lin4)))
+        return self.lin_bn6(self.linear6(lin5))
+
+
+
+    def forward(self, x):
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        return self.decode(z), mu, logvar
+
+class customLoss(nn.Module):
+    def __init__(self):
+        super(customLoss, self).__init__()
+        self.mse_loss = nn.MSELoss(reduction="sum")
+
+    def forward(self, x_recon, x, mu, logvar):
+        loss_MSE = self.mse_loss(x_recon, x)
+        loss_KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+        return loss_MSE + loss_KLD
+
+# takes in a module and applies the specified weight initialization
+def weights_init_uniform_rule(m):
+    classname = m.__class__.__name__
+    # for every Linear layer in a model..
+    if classname.find('Linear') != -1:
+        # get the number of the inputs
+        n = m.in_features
+        y = 1.0/np.sqrt(n)
+        m.weight.data.uniform_(-y, y)
+        m.bias.data.fill_(0)
+
+
+def train(epoch, model, optimizer, loss_mse, trainloader, device):
+    model.train()
+    train_loss = 0
+    for batch_idx, data in enumerate(trainloader):
+        data = data.to(device)
+        optimizer.zero_grad()
+        recon_batch, mu, logvar = model(data)
+        loss = loss_mse(recon_batch, data, mu, logvar)
+        loss.backward()
+        train_loss += loss.item()
+        optimizer.step()
+    if epoch % 200 == 0:
+        print('====> Epoch: {} Average training loss: {:.4f}'.format(
+            epoch, train_loss / len(trainloader.dataset)))
+
+    # Here, you might return the average loss for this epoch if needed
+    return train_loss / len(trainloader.dataset)
+
+def test(epoch, model, optimizer, loss_mse, testloader, device):
+    model.eval()  # Set the model to evaluation mode
+    test_loss = 0
+    with torch.no_grad():
+        for batch_idx, data in enumerate(testloader):
+            data = data.to(device)
+            recon_batch, mu, logvar = model(data)
+            loss = loss_mse(recon_batch, data, mu, logvar)
+            test_loss += loss.item()
+
+    average_test_loss = test_loss / len(testloader.dataset)
+    if epoch % 200 == 0:
+        print('===============> Epoch: {} Average test loss: {:.4f}'.format(epoch, average_test_loss))
+
+    # Here, return the average loss for this epoch
+    return average_test_loss
+
+def objective(trial):
+    # Suggest values for the hyperparameters based on the dictionary
+    hiden1 = trial.suggest_int('hiden1', param_ranges['hiden1']['low'], param_ranges['hiden1']['high'])
+    hiden2 = trial.suggest_int('hiden2', param_ranges['hiden2']['low'], param_ranges['hiden2']['high'])
+    latent_dim = trial.suggest_int('latent_dim', param_ranges['latent_dim']['low'], param_ranges['latent_dim']['high'])
+    lr = trial.suggest_loguniform('lr', param_ranges['lr']['low'], param_ranges['lr']['high'])
+    epochs = trial.suggest_int('epochs', param_ranges['epochs']['low'], param_ranges['epochs']['high'])
+
+    # Initialize model, optimizer, and loss function with suggested values
+    model = VAutoencoder(D_in, hiden1, hiden2, latent_dim).to(device)
+    model.apply(weights_init_uniform_rule)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    loss_mse = customLoss()
+
+    # Training and validation process
+    test_loss = 0
+    for epoch in range(1, epochs + 1):
+        train(epoch, model, optimizer, loss_mse, trainloader, device)
+        test_loss = test(epoch, model, optimizer, loss_mse, testloader, device)
+
+    # Return the final test loss
+    return test_loss
+
+# -----------------------------------------------------------------------------------
+# Optimze phase----------------------------------------------------------------------
+# Create a study object and specify the optimization direction
+study = optuna.create_study(direction='minimize')
+study.optimize(objective, n_trials=n_trials)  # You can specify the number of trials
+
+# Print the optimal hyperparameters
+print(f'optimal hyperparameters: {study.best_params}')
+
+# Generation fase--------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------
+best_params = study.best_params
+
+# Reinitialize and train the model with the best hyperparameters
+# Note: This step can be skipped if you have saved your best model during the optimization process
+model = VAutoencoder(D_in, best_params['hiden1'], best_params['hiden2'], best_params['latent_dim']).to(device)
+model.apply(weights_init_uniform_rule)
+optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
+loss_mse = customLoss()
+
+for epoch in range(1, best_params['epochs'] + 1):
+    train(epoch, model, optimizer, loss_mse, trainloader, device)
+
+torch.save(model, exp_dir + 'vautoencoder_complete.pth')
+
+with torch.no_grad():
+    mus, logvars = [], []
+    for data in testloader:
+        data = data.to(device)
+        recon_batch, mu, logvar = model(data)
+        mus.append(mu)
+        logvars.append(logvar)
+    mu = torch.cat(mus, dim=0)
+    logvar = torch.cat(logvars, dim=0)
+
+# Calculate sigma: a concise way to calculate the standard deviation σ from log-variance
+sigma = torch.exp(logvar / 2)
+
+# Sample z from q
+q = torch.distributions.Normal(mu.mean(dim=0), sigma.mean(dim=0))
+z = q.rsample(sample_shape=torch.Size([n_samples]))
+
+# Decode z to generate fake data
+with torch.no_grad():
+    pred = model.decode(z).cpu().numpy()
+
+# Inverse transform to get data in original scale
+scaler = trainloader.dataset.standardizer
+fake_data = scaler.inverse_transform(pred)
+
+# Create a DataFrame for the fake data
+df_fake = pd.DataFrame(fake_data, columns=cols)
+df_fake.to_csv( exp_dir + 'syndf.csv', sep=',')
+
+# -----------------------------------------------------------------------------------------
+# Evaluate---------------------------------------------------------------------------------
+
+df_base_str = str(df_base.dtypes)
+
+def create_metadata_dict(dtype_str, primary_key):
+    # Initialize the dictionary structure
+    metadata = {
+        "primary_key": primary_key,
+        "columns": {}
+    }
+
+    # Split the string by newlines and iterate over the lines
+    for line in dtype_str.split('\n'):
+        # Ignore the 'dtype: object' line
+        if line.strip() == 'dtype: object':
+            continue
+
+        # Split each line by spaces and filter out empty strings
+        parts = [part for part in line.split(' ') if part]
+
+        # Check if there are two parts (column name and data type)
+        if len(parts) == 2:
+            column_name, dtype = parts
+
+            # Determine the sdtype based on dtype
+            if dtype in ['int64', 'float64']:
+                sdtype = 'numerical'
+            else:
+                sdtype = 'unknown'  # Placeholder for other data types
+
+            # Populate the metadata dictionary
+            metadata['columns'][column_name] = {"sdtype": sdtype}
+
+    return metadata
+
+
+metadata_dict = create_metadata_dict(df_base_str, class_column)
+
+# Save the dictionary to a JSON file
+file_path = exp_dir + 'metadata.json'
+with open(file_path, 'w') as file:
+    json.dump(metadata_dict, file, indent=4)
+
+with open(file_path, 'r') as file:
+    metadata_dict = json.load(file)
+
+my_report = QualityReport()
+
+my_report.generate(df_base, df_fake, metadata_dict)
+
+print(my_report.get_details(property_name='Column Shapes'))
+print(my_report.get_details(property_name='Column Pair Trends'))
+
+fig_pair_trends = my_report.get_visualization(property_name='Column Pair Trends')
+fig_pair_trends.write_image(exp_dir+ "pair_trends.pdf")
+
+fig_shapes = my_report.get_visualization(property_name='Column Shapes')
+fig_shapes.write_image(exp_dir+ "shapes.pdf")
+
+if show_quality_figs:
+    fig_pair_trends.show()
+    fig_shapes.show()
+
+my_report.save(filepath= exp_dir + 'demo_data_quality_report.pkl')
