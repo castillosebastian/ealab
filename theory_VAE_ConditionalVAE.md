@@ -21,6 +21,9 @@
     - https://github.com/qlero/medical_data_augmentation
 
 # Sythetic Data Evaluation
+
+    Amazing Tool!
+
     - https://sdv.dev/SDV/index.html and https://sdv.dev/SDV/user_guides/evaluation/evaluation_framework.html#evaluation-framework 
 
 # Examples
