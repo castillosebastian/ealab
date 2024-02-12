@@ -1,0 +1,47 @@
+{
+    "primary_key": "Wine",
+    "columns": {
+        "Wine": {
+            "sdtype": "numerical"
+        },
+        "Alcohol": {
+            "sdtype": "numerical"
+        },
+        "Malic.acid": {
+            "sdtype": "numerical"
+        },
+        "Ash": {
+            "sdtype": "numerical"
+        },
+        "Acl": {
+            "sdtype": "numerical"
+        },
+        "Mg": {
+            "sdtype": "numerical"
+        },
+        "Phenols": {
+            "sdtype": "numerical"
+        },
+        "Flavanoids": {
+            "sdtype": "numerical"
+        },
+        "Nonflavanoid.phenols": {
+            "sdtype": "numerical"
+        },
+        "Proanth": {
+            "sdtype": "numerical"
+        },
+        "Color.int": {
+            "sdtype": "numerical"
+        },
+        "Hue": {
+            "sdtype": "numerical"
+        },
+        "OD": {
+            "sdtype": "numerical"
+        },
+        "Proline": {
+            "sdtype": "numerical"
+        }
+    }
+}
