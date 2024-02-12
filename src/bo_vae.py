@@ -1,4 +1,5 @@
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,7 +10,9 @@ import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sdmetrics import load_demo
+from scipy.io import arff
 
 def load_and_standardize_data(path):
     # read in from csv
@@ -25,9 +28,56 @@ def load_and_standardize_data(path):
     X_test = scaler.transform(X_test)
     return X_train, X_test, scaler, df
 
+
+def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
+
+    if dataset_name == 'leukemia':
+        # File paths for leukemia dataset
+        train_file_path = os.path.join(root_dir, 'data', 'leukemia_train_38x7129.arff')
+        test_file_path = os.path.join(root_dir, 'data', 'leukemia_test_34x7129.arff')
+
+        # Load the data
+        tra, _ = arff.loadarff(train_file_path)
+        tst, _ = arff.loadarff(test_file_path)
+
+        # Convert to pandas DataFrame
+        train_df = pd.DataFrame(tra)
+        test_df = pd.DataFrame(tst)
+
+        # Decode byte strings to strings (necessary for string data in arff files)
+        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+
+        # Initialize label encoder
+        label_encoder = LabelEncoder()
+
+        # Fit label encoder and return encoded labels
+        train_df[class_column] = label_encoder.fit_transform(train_df[class_column])
+        test_df[class_column] = label_encoder.transform(test_df[class_column])
+
+        # Create a mapping dictionary for class labels
+        class_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+
+        # Combine the train and test dataframes
+        df = pd.concat([train_df, test_df], ignore_index=True)
+
+        # Standardize only the feature columns (assuming last column is label)
+        #feature_columns = df.columns[df.columns != class_column]
+        feature_columns = df.columns
+        scaler = StandardScaler()
+        train_df[feature_columns] = scaler.fit_transform(train_df[feature_columns])
+        test_df[feature_columns] = scaler.transform(test_df[feature_columns])
+
+        train_df = train_df.to_numpy()
+        test_df = test_df.to_numpy()
+
+        return train_df, test_df, scaler, df, class_mapping
+    else:
+       pass
+
 class DataBuilder(Dataset):
-    def __init__(self, path, train=True):
-        self.X_train, self.X_test, self.standardizer, _ = load_and_standardize_data(path)
+    def __init__(self, root, datasetname, classcolumn,  train=True):
+        self.X_train, self.X_test, self.standardizer, _, _ = load_and_standardize_data_thesis(root_dir=root, dataset_name=datasetname, class_column=classcolumn)
         if train:
             self.x = torch.from_numpy(self.X_train)
             self.len=self.x.shape[0]
@@ -134,7 +184,7 @@ def train(epoch, model, optimizer, loss_mse, trainloader, device):
     model.train()
     train_loss = 0
     for batch_idx, data in enumerate(trainloader):
-        data = data.to(device)
+        data = data.float().to(device)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = loss_mse(recon_batch, data, mu, logvar)
@@ -151,7 +201,7 @@ def test(epoch, model, optimizer, loss_mse, testloader, device):
     test_loss = 0
     with torch.no_grad():
         for batch_idx, data in enumerate(testloader):
-            data = data.to(device)
+            data = data.float().to(device)
             recon_batch, mu, logvar = model(data)
             loss = loss_mse(recon_batch, data, mu, logvar)
             test_loss += loss.item()
@@ -172,7 +222,7 @@ def objective(trial,trainloader,testloader, param_ranges=None, device = 'cpu'):
     D_in = trainloader.dataset.x.shape[1]
 
     # Initialize model, optimizer, and loss function with suggested values
-    model = VAutoencoder(D_in, hiden1, hiden2, latent_dim).to(device)
+    model = VAutoencoder(D_in, hiden1, hiden2, latent_dim).float().to(device)
     model.apply(weights_init_uniform_rule)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     loss_mse = customLoss()
@@ -217,3 +267,13 @@ def create_metadata_dict(dtype_str, primary_key):
 
     return metadata
 
+def create_dictionary(class_column, cols):
+    template = {
+        "primary_key": class_column,
+        "columns": {}
+    }
+    for col in cols:
+        #if col != class_column:
+        template["columns"][col] = {"sdtype": "numerical"}
+
+    return template
