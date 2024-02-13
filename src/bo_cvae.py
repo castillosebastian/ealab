@@ -227,7 +227,7 @@ def objective(trial,trainloader,testloader, param_ranges=None, device = 'cpu', n
         lr = trial.suggest_loguniform('lr', param_ranges['lr']['low'], param_ranges['lr']['high'])
         epochs = trial.suggest_int('epochs', param_ranges['epochs']['low'], param_ranges['epochs']['high'])        
         D_in = trainloader.dataset.data.shape[1]
-
+        
         # Initialize model, optimizer, and loss function with suggested values
         model = CVAE(input_size=D_in, labels_length=num_classes, H=hiden1, H2=hiden2,latent_dim=latent_dim).float().to(device)
         model.apply(weights_init_uniform_rule)
