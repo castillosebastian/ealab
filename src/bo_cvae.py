@@ -62,8 +62,8 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         df = pd.concat([train_df, test_df], ignore_index=True)
 
         # Standardize only the feature columns (assuming last column is label)
-        #feature_columns = df.columns[df.columns != class_column]
-        feature_columns = df.columns
+        feature_columns = df.columns[df.columns != class_column]
+        #feature_columns = df.columns
         scaler = StandardScaler()
         train_df[feature_columns] = scaler.fit_transform(train_df[feature_columns])
         test_df[feature_columns] = scaler.transform(test_df[feature_columns])
@@ -72,6 +72,53 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         test_df = test_df.to_numpy()
 
         return train_df, test_df, scaler, df, class_mapping
+    
+    elif  dataset_name == "madelon":        
+        # File paths for leukemia dataset
+        train_file_path = os.path.join(root_dir, 'data', 'madelon.trn.arff')
+        test_file_path = os.path.join(root_dir, 'data', 'madelon.tst.arff')
+
+        # Load the data
+        tra, _ = arff.loadarff(train_file_path)
+        tst, _ = arff.loadarff(test_file_path)
+
+        # Convert to pandas DataFrame
+        train_df = pd.DataFrame(tra)
+        test_df = pd.DataFrame(tst)
+
+        # Decode byte strings to strings (necessary for string data in arff files)
+        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+
+        # Initialize label encoder
+        label_encoder = LabelEncoder()
+
+        # Fit label encoder and return encoded labels
+        train_df[class_column] = label_encoder.fit_transform(train_df[class_column])
+        test_df[class_column] = label_encoder.transform(test_df[class_column])
+
+        # Map encoded labels from '-1', '1' to '0', '1'
+        #train_df[class_column] = train_df[class_column].apply(lambda x: 0 if x == -1 else 1)
+        #test_df[class_column] = test_df[class_column].apply(lambda x: 0 if x == -1 else 1)
+
+        # Create a mapping dictionary for class labels
+        class_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+
+        # Combine the train and test dataframes
+        df = pd.concat([train_df, test_df], ignore_index=True)
+
+        # Standardize only the feature columns (assuming last column is label)
+        feature_columns = df.columns[df.columns != class_column]
+        #feature_columns = df.columns
+        scaler = StandardScaler()
+        train_df[feature_columns] = scaler.fit_transform(train_df[feature_columns])
+        test_df[feature_columns] = scaler.transform(test_df[feature_columns])
+
+        train_df = train_df.to_numpy()
+        test_df = test_df.to_numpy()
+
+        return train_df, test_df, scaler, df, class_mapping
+
     else:
        pass
 
@@ -224,7 +271,7 @@ def objective(trial,trainloader,testloader, param_ranges=None, device = 'cpu', n
         hiden1 = trial.suggest_int('hiden1', param_ranges['hiden1']['low'], param_ranges['hiden1']['high'])
         hiden2 = trial.suggest_int('hiden2', param_ranges['hiden2']['low'], param_ranges['hiden2']['high'])
         latent_dim = trial.suggest_int('latent_dim', param_ranges['latent_dim']['low'], param_ranges['latent_dim']['high'])
-        lr = trial.suggest_loguniform('lr', param_ranges['lr']['low'], param_ranges['lr']['high'])
+        lr = trial.suggest_float('lr', param_ranges['lr']['low'], param_ranges['lr']['high'])
         epochs = trial.suggest_int('epochs', param_ranges['epochs']['low'], param_ranges['epochs']['high'])        
         D_in = trainloader.dataset.data.shape[1]
         
@@ -235,10 +282,25 @@ def objective(trial,trainloader,testloader, param_ranges=None, device = 'cpu', n
         loss_mse = customLoss()
 
         # Training and validation process
-        test_loss = 0
+        best_test_loss = float('inf')
+        epochs_no_improve = 0
+        patience = 800  # Number of epochs to wait for improvement before stopping
+
         for epoch in range(1, epochs + 1):
             train(epoch, model, optimizer, loss_mse, trainloader, device)
             test_loss = test(epoch, model, loss_mse, testloader, device)
+
+            # Check if test loss improved
+            if test_loss < best_test_loss:
+                best_test_loss = test_loss
+                epochs_no_improve = 0  # Reset counter
+            else:
+                epochs_no_improve += 1
+
+            # Early stopping check
+            if epochs_no_improve == patience:
+                print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
+                break
 
         # Return the final test loss
         return test_loss

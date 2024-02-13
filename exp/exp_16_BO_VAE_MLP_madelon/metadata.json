@@ -1,0 +1,1508 @@
+{
+    "primary_key": "class",
+    "columns": {
+        "att_1": {
+            "sdtype": "numerical"
+        },
+        "att_2": {
+            "sdtype": "numerical"
+        },
+        "att_3": {
+            "sdtype": "numerical"
+        },
+        "att_4": {
+            "sdtype": "numerical"
+        },
+        "att_5": {
+            "sdtype": "numerical"
+        },
+        "att_6": {
+            "sdtype": "numerical"
+        },
+        "att_7": {
+            "sdtype": "numerical"
+        },
+        "att_8": {
+            "sdtype": "numerical"
+        },
+        "att_9": {
+            "sdtype": "numerical"
+        },
+        "att_10": {
+            "sdtype": "numerical"
+        },
+        "att_11": {
+            "sdtype": "numerical"
+        },
+        "att_12": {
+            "sdtype": "numerical"
+        },
+        "att_13": {
+            "sdtype": "numerical"
+        },
+        "att_14": {
+            "sdtype": "numerical"
+        },
+        "att_15": {
+            "sdtype": "numerical"
+        },
+        "att_16": {
+            "sdtype": "numerical"
+        },
+        "att_17": {
+            "sdtype": "numerical"
+        },
+        "att_18": {
+            "sdtype": "numerical"
+        },
+        "att_19": {
+            "sdtype": "numerical"
+        },
+        "att_20": {
+            "sdtype": "numerical"
+        },
+        "att_21": {
+            "sdtype": "numerical"
+        },
+        "att_22": {
+            "sdtype": "numerical"
+        },
+        "att_23": {
+            "sdtype": "numerical"
+        },
+        "att_24": {
+            "sdtype": "numerical"
+        },
+        "att_25": {
+            "sdtype": "numerical"
+        },
+        "att_26": {
+            "sdtype": "numerical"
+        },
+        "att_27": {
+            "sdtype": "numerical"
+        },
+        "att_28": {
+            "sdtype": "numerical"
+        },
+        "att_29": {
+            "sdtype": "numerical"
+        },
+        "att_30": {
+            "sdtype": "numerical"
+        },
+        "att_31": {
+            "sdtype": "numerical"
+        },
+        "att_32": {
+            "sdtype": "numerical"
+        },
+        "att_33": {
+            "sdtype": "numerical"
+        },
+        "att_34": {
+            "sdtype": "numerical"
+        },
+        "att_35": {
+            "sdtype": "numerical"
+        },
+        "att_36": {
+            "sdtype": "numerical"
+        },
+        "att_37": {
+            "sdtype": "numerical"
+        },
+        "att_38": {
+            "sdtype": "numerical"
+        },
+        "att_39": {
+            "sdtype": "numerical"
+        },
+        "att_40": {
+            "sdtype": "numerical"
+        },
+        "att_41": {
+            "sdtype": "numerical"
+        },
+        "att_42": {
+            "sdtype": "numerical"
+        },
+        "att_43": {
+            "sdtype": "numerical"
+        },
+        "att_44": {
+            "sdtype": "numerical"
+        },
+        "att_45": {
+            "sdtype": "numerical"
+        },
+        "att_46": {
+            "sdtype": "numerical"
+        },
+        "att_47": {
+            "sdtype": "numerical"
+        },
+        "att_48": {
+            "sdtype": "numerical"
+        },
+        "att_49": {
+            "sdtype": "numerical"
+        },
+        "att_50": {
+            "sdtype": "numerical"
+        },
+        "att_51": {
+            "sdtype": "numerical"
+        },
+        "att_52": {
+            "sdtype": "numerical"
+        },
+        "att_53": {
+            "sdtype": "numerical"
+        },
+        "att_54": {
+            "sdtype": "numerical"
+        },
+        "att_55": {
+            "sdtype": "numerical"
+        },
+        "att_56": {
+            "sdtype": "numerical"
+        },
+        "att_57": {
+            "sdtype": "numerical"
+        },
+        "att_58": {
+            "sdtype": "numerical"
+        },
+        "att_59": {
+            "sdtype": "numerical"
+        },
+        "att_60": {
+            "sdtype": "numerical"
+        },
+        "att_61": {
+            "sdtype": "numerical"
+        },
+        "att_62": {
+            "sdtype": "numerical"
+        },
+        "att_63": {
+            "sdtype": "numerical"
+        },
+        "att_64": {
+            "sdtype": "numerical"
+        },
+        "att_65": {
+            "sdtype": "numerical"
+        },
+        "att_66": {
+            "sdtype": "numerical"
+        },
+        "att_67": {
+            "sdtype": "numerical"
+        },
+        "att_68": {
+            "sdtype": "numerical"
+        },
+        "att_69": {
+            "sdtype": "numerical"
+        },
+        "att_70": {
+            "sdtype": "numerical"
+        },
+        "att_71": {
+            "sdtype": "numerical"
+        },
+        "att_72": {
+            "sdtype": "numerical"
+        },
+        "att_73": {
+            "sdtype": "numerical"
+        },
+        "att_74": {
+            "sdtype": "numerical"
+        },
+        "att_75": {
+            "sdtype": "numerical"
+        },
+        "att_76": {
+            "sdtype": "numerical"
+        },
+        "att_77": {
+            "sdtype": "numerical"
+        },
+        "att_78": {
+            "sdtype": "numerical"
+        },
+        "att_79": {
+            "sdtype": "numerical"
+        },
+        "att_80": {
+            "sdtype": "numerical"
+        },
+        "att_81": {
+            "sdtype": "numerical"
+        },
+        "att_82": {
+            "sdtype": "numerical"
+        },
+        "att_83": {
+            "sdtype": "numerical"
+        },
+        "att_84": {
+            "sdtype": "numerical"
+        },
+        "att_85": {
+            "sdtype": "numerical"
+        },
+        "att_86": {
+            "sdtype": "numerical"
+        },
+        "att_87": {
+            "sdtype": "numerical"
+        },
+        "att_88": {
+            "sdtype": "numerical"
+        },
+        "att_89": {
+            "sdtype": "numerical"
+        },
+        "att_90": {
+            "sdtype": "numerical"
+        },
+        "att_91": {
+            "sdtype": "numerical"
+        },
+        "att_92": {
+            "sdtype": "numerical"
+        },
+        "att_93": {
+            "sdtype": "numerical"
+        },
+        "att_94": {
+            "sdtype": "numerical"
+        },
+        "att_95": {
+            "sdtype": "numerical"
+        },
+        "att_96": {
+            "sdtype": "numerical"
+        },
+        "att_97": {
+            "sdtype": "numerical"
+        },
+        "att_98": {
+            "sdtype": "numerical"
+        },
+        "att_99": {
+            "sdtype": "numerical"
+        },
+        "att_100": {
+            "sdtype": "numerical"
+        },
+        "att_101": {
+            "sdtype": "numerical"
+        },
+        "att_102": {
+            "sdtype": "numerical"
+        },
+        "att_103": {
+            "sdtype": "numerical"
+        },
+        "att_104": {
+            "sdtype": "numerical"
+        },
+        "att_105": {
+            "sdtype": "numerical"
+        },
+        "att_106": {
+            "sdtype": "numerical"
+        },
+        "att_107": {
+            "sdtype": "numerical"
+        },
+        "att_108": {
+            "sdtype": "numerical"
+        },
+        "att_109": {
+            "sdtype": "numerical"
+        },
+        "att_110": {
+            "sdtype": "numerical"
+        },
+        "att_111": {
+            "sdtype": "numerical"
+        },
+        "att_112": {
+            "sdtype": "numerical"
+        },
+        "att_113": {
+            "sdtype": "numerical"
+        },
+        "att_114": {
+            "sdtype": "numerical"
+        },
+        "att_115": {
+            "sdtype": "numerical"
+        },
+        "att_116": {
+            "sdtype": "numerical"
+        },
+        "att_117": {
+            "sdtype": "numerical"
+        },
+        "att_118": {
+            "sdtype": "numerical"
+        },
+        "att_119": {
+            "sdtype": "numerical"
+        },
+        "att_120": {
+            "sdtype": "numerical"
+        },
+        "att_121": {
+            "sdtype": "numerical"
+        },
+        "att_122": {
+            "sdtype": "numerical"
+        },
+        "att_123": {
+            "sdtype": "numerical"
+        },
+        "att_124": {
+            "sdtype": "numerical"
+        },
+        "att_125": {
+            "sdtype": "numerical"
+        },
+        "att_126": {
+            "sdtype": "numerical"
+        },
+        "att_127": {
+            "sdtype": "numerical"
+        },
+        "att_128": {
+            "sdtype": "numerical"
+        },
+        "att_129": {
+            "sdtype": "numerical"
+        },
+        "att_130": {
+            "sdtype": "numerical"
+        },
+        "att_131": {
+            "sdtype": "numerical"
+        },
+        "att_132": {
+            "sdtype": "numerical"
+        },
+        "att_133": {
+            "sdtype": "numerical"
+        },
+        "att_134": {
+            "sdtype": "numerical"
+        },
+        "att_135": {
+            "sdtype": "numerical"
+        },
+        "att_136": {
+            "sdtype": "numerical"
+        },
+        "att_137": {
+            "sdtype": "numerical"
+        },
+        "att_138": {
+            "sdtype": "numerical"
+        },
+        "att_139": {
+            "sdtype": "numerical"
+        },
+        "att_140": {
+            "sdtype": "numerical"
+        },
+        "att_141": {
+            "sdtype": "numerical"
+        },
+        "att_142": {
+            "sdtype": "numerical"
+        },
+        "att_143": {
+            "sdtype": "numerical"
+        },
+        "att_144": {
+            "sdtype": "numerical"
+        },
+        "att_145": {
+            "sdtype": "numerical"
+        },
+        "att_146": {
+            "sdtype": "numerical"
+        },
+        "att_147": {
+            "sdtype": "numerical"
+        },
+        "att_148": {
+            "sdtype": "numerical"
+        },
+        "att_149": {
+            "sdtype": "numerical"
+        },
+        "att_150": {
+            "sdtype": "numerical"
+        },
+        "att_151": {
+            "sdtype": "numerical"
+        },
+        "att_152": {
+            "sdtype": "numerical"
+        },
+        "att_153": {
+            "sdtype": "numerical"
+        },
+        "att_154": {
+            "sdtype": "numerical"
+        },
+        "att_155": {
+            "sdtype": "numerical"
+        },
+        "att_156": {
+            "sdtype": "numerical"
+        },
+        "att_157": {
+            "sdtype": "numerical"
+        },
+        "att_158": {
+            "sdtype": "numerical"
+        },
+        "att_159": {
+            "sdtype": "numerical"
+        },
+        "att_160": {
+            "sdtype": "numerical"
+        },
+        "att_161": {
+            "sdtype": "numerical"
+        },
+        "att_162": {
+            "sdtype": "numerical"
+        },
+        "att_163": {
+            "sdtype": "numerical"
+        },
+        "att_164": {
+            "sdtype": "numerical"
+        },
+        "att_165": {
+            "sdtype": "numerical"
+        },
+        "att_166": {
+            "sdtype": "numerical"
+        },
+        "att_167": {
+            "sdtype": "numerical"
+        },
+        "att_168": {
+            "sdtype": "numerical"
+        },
+        "att_169": {
+            "sdtype": "numerical"
+        },
+        "att_170": {
+            "sdtype": "numerical"
+        },
+        "att_171": {
+            "sdtype": "numerical"
+        },
+        "att_172": {
+            "sdtype": "numerical"
+        },
+        "att_173": {
+            "sdtype": "numerical"
+        },
+        "att_174": {
+            "sdtype": "numerical"
+        },
+        "att_175": {
+            "sdtype": "numerical"
+        },
+        "att_176": {
+            "sdtype": "numerical"
+        },
+        "att_177": {
+            "sdtype": "numerical"
+        },
+        "att_178": {
+            "sdtype": "numerical"
+        },
+        "att_179": {
+            "sdtype": "numerical"
+        },
+        "att_180": {
+            "sdtype": "numerical"
+        },
+        "att_181": {
+            "sdtype": "numerical"
+        },
+        "att_182": {
+            "sdtype": "numerical"
+        },
+        "att_183": {
+            "sdtype": "numerical"
+        },
+        "att_184": {
+            "sdtype": "numerical"
+        },
+        "att_185": {
+            "sdtype": "numerical"
+        },
+        "att_186": {
+            "sdtype": "numerical"
+        },
+        "att_187": {
+            "sdtype": "numerical"
+        },
+        "att_188": {
+            "sdtype": "numerical"
+        },
+        "att_189": {
+            "sdtype": "numerical"
+        },
+        "att_190": {
+            "sdtype": "numerical"
+        },
+        "att_191": {
+            "sdtype": "numerical"
+        },
+        "att_192": {
+            "sdtype": "numerical"
+        },
+        "att_193": {
+            "sdtype": "numerical"
+        },
+        "att_194": {
+            "sdtype": "numerical"
+        },
+        "att_195": {
+            "sdtype": "numerical"
+        },
+        "att_196": {
+            "sdtype": "numerical"
+        },
+        "att_197": {
+            "sdtype": "numerical"
+        },
+        "att_198": {
+            "sdtype": "numerical"
+        },
+        "att_199": {
+            "sdtype": "numerical"
+        },
+        "att_200": {
+            "sdtype": "numerical"
+        },
+        "att_201": {
+            "sdtype": "numerical"
+        },
+        "att_202": {
+            "sdtype": "numerical"
+        },
+        "att_203": {
+            "sdtype": "numerical"
+        },
+        "att_204": {
+            "sdtype": "numerical"
+        },
+        "att_205": {
+            "sdtype": "numerical"
+        },
+        "att_206": {
+            "sdtype": "numerical"
+        },
+        "att_207": {
+            "sdtype": "numerical"
+        },
+        "att_208": {
+            "sdtype": "numerical"
+        },
+        "att_209": {
+            "sdtype": "numerical"
+        },
+        "att_210": {
+            "sdtype": "numerical"
+        },
+        "att_211": {
+            "sdtype": "numerical"
+        },
+        "att_212": {
+            "sdtype": "numerical"
+        },
+        "att_213": {
+            "sdtype": "numerical"
+        },
+        "att_214": {
+            "sdtype": "numerical"
+        },
+        "att_215": {
+            "sdtype": "numerical"
+        },
+        "att_216": {
+            "sdtype": "numerical"
+        },
+        "att_217": {
+            "sdtype": "numerical"
+        },
+        "att_218": {
+            "sdtype": "numerical"
+        },
+        "att_219": {
+            "sdtype": "numerical"
+        },
+        "att_220": {
+            "sdtype": "numerical"
+        },
+        "att_221": {
+            "sdtype": "numerical"
+        },
+        "att_222": {
+            "sdtype": "numerical"
+        },
+        "att_223": {
+            "sdtype": "numerical"
+        },
+        "att_224": {
+            "sdtype": "numerical"
+        },
+        "att_225": {
+            "sdtype": "numerical"
+        },
+        "att_226": {
+            "sdtype": "numerical"
+        },
+        "att_227": {
+            "sdtype": "numerical"
+        },
+        "att_228": {
+            "sdtype": "numerical"
+        },
+        "att_229": {
+            "sdtype": "numerical"
+        },
+        "att_230": {
+            "sdtype": "numerical"
+        },
+        "att_231": {
+            "sdtype": "numerical"
+        },
+        "att_232": {
+            "sdtype": "numerical"
+        },
+        "att_233": {
+            "sdtype": "numerical"
+        },
+        "att_234": {
+            "sdtype": "numerical"
+        },
+        "att_235": {
+            "sdtype": "numerical"
+        },
+        "att_236": {
+            "sdtype": "numerical"
+        },
+        "att_237": {
+            "sdtype": "numerical"
+        },
+        "att_238": {
+            "sdtype": "numerical"
+        },
+        "att_239": {
+            "sdtype": "numerical"
+        },
+        "att_240": {
+            "sdtype": "numerical"
+        },
+        "att_241": {
+            "sdtype": "numerical"
+        },
+        "att_242": {
+            "sdtype": "numerical"
+        },
+        "att_243": {
+            "sdtype": "numerical"
+        },
+        "att_244": {
+            "sdtype": "numerical"
+        },
+        "att_245": {
+            "sdtype": "numerical"
+        },
+        "att_246": {
+            "sdtype": "numerical"
+        },
+        "att_247": {
+            "sdtype": "numerical"
+        },
+        "att_248": {
+            "sdtype": "numerical"
+        },
+        "att_249": {
+            "sdtype": "numerical"
+        },
+        "att_250": {
+            "sdtype": "numerical"
+        },
+        "att_251": {
+            "sdtype": "numerical"
+        },
+        "att_252": {
+            "sdtype": "numerical"
+        },
+        "att_253": {
+            "sdtype": "numerical"
+        },
+        "att_254": {
+            "sdtype": "numerical"
+        },
+        "att_255": {
+            "sdtype": "numerical"
+        },
+        "att_256": {
+            "sdtype": "numerical"
+        },
+        "att_257": {
+            "sdtype": "numerical"
+        },
+        "att_258": {
+            "sdtype": "numerical"
+        },
+        "att_259": {
+            "sdtype": "numerical"
+        },
+        "att_260": {
+            "sdtype": "numerical"
+        },
+        "att_261": {
+            "sdtype": "numerical"
+        },
+        "att_262": {
+            "sdtype": "numerical"
+        },
+        "att_263": {
+            "sdtype": "numerical"
+        },
+        "att_264": {
+            "sdtype": "numerical"
+        },
+        "att_265": {
+            "sdtype": "numerical"
+        },
+        "att_266": {
+            "sdtype": "numerical"
+        },
+        "att_267": {
+            "sdtype": "numerical"
+        },
+        "att_268": {
+            "sdtype": "numerical"
+        },
+        "att_269": {
+            "sdtype": "numerical"
+        },
+        "att_270": {
+            "sdtype": "numerical"
+        },
+        "att_271": {
+            "sdtype": "numerical"
+        },
+        "att_272": {
+            "sdtype": "numerical"
+        },
+        "att_273": {
+            "sdtype": "numerical"
+        },
+        "att_274": {
+            "sdtype": "numerical"
+        },
+        "att_275": {
+            "sdtype": "numerical"
+        },
+        "att_276": {
+            "sdtype": "numerical"
+        },
+        "att_277": {
+            "sdtype": "numerical"
+        },
+        "att_278": {
+            "sdtype": "numerical"
+        },
+        "att_279": {
+            "sdtype": "numerical"
+        },
+        "att_280": {
+            "sdtype": "numerical"
+        },
+        "att_281": {
+            "sdtype": "numerical"
+        },
+        "att_282": {
+            "sdtype": "numerical"
+        },
+        "att_283": {
+            "sdtype": "numerical"
+        },
+        "att_284": {
+            "sdtype": "numerical"
+        },
+        "att_285": {
+            "sdtype": "numerical"
+        },
+        "att_286": {
+            "sdtype": "numerical"
+        },
+        "att_287": {
+            "sdtype": "numerical"
+        },
+        "att_288": {
+            "sdtype": "numerical"
+        },
+        "att_289": {
+            "sdtype": "numerical"
+        },
+        "att_290": {
+            "sdtype": "numerical"
+        },
+        "att_291": {
+            "sdtype": "numerical"
+        },
+        "att_292": {
+            "sdtype": "numerical"
+        },
+        "att_293": {
+            "sdtype": "numerical"
+        },
+        "att_294": {
+            "sdtype": "numerical"
+        },
+        "att_295": {
+            "sdtype": "numerical"
+        },
+        "att_296": {
+            "sdtype": "numerical"
+        },
+        "att_297": {
+            "sdtype": "numerical"
+        },
+        "att_298": {
+            "sdtype": "numerical"
+        },
+        "att_299": {
+            "sdtype": "numerical"
+        },
+        "att_300": {
+            "sdtype": "numerical"
+        },
+        "att_301": {
+            "sdtype": "numerical"
+        },
+        "att_302": {
+            "sdtype": "numerical"
+        },
+        "att_303": {
+            "sdtype": "numerical"
+        },
+        "att_304": {
+            "sdtype": "numerical"
+        },
+        "att_305": {
+            "sdtype": "numerical"
+        },
+        "att_306": {
+            "sdtype": "numerical"
+        },
+        "att_307": {
+            "sdtype": "numerical"
+        },
+        "att_308": {
+            "sdtype": "numerical"
+        },
+        "att_309": {
+            "sdtype": "numerical"
+        },
+        "att_310": {
+            "sdtype": "numerical"
+        },
+        "att_311": {
+            "sdtype": "numerical"
+        },
+        "att_312": {
+            "sdtype": "numerical"
+        },
+        "att_313": {
+            "sdtype": "numerical"
+        },
+        "att_314": {
+            "sdtype": "numerical"
+        },
+        "att_315": {
+            "sdtype": "numerical"
+        },
+        "att_316": {
+            "sdtype": "numerical"
+        },
+        "att_317": {
+            "sdtype": "numerical"
+        },
+        "att_318": {
+            "sdtype": "numerical"
+        },
+        "att_319": {
+            "sdtype": "numerical"
+        },
+        "att_320": {
+            "sdtype": "numerical"
+        },
+        "att_321": {
+            "sdtype": "numerical"
+        },
+        "att_322": {
+            "sdtype": "numerical"
+        },
+        "att_323": {
+            "sdtype": "numerical"
+        },
+        "att_324": {
+            "sdtype": "numerical"
+        },
+        "att_325": {
+            "sdtype": "numerical"
+        },
+        "att_326": {
+            "sdtype": "numerical"
+        },
+        "att_327": {
+            "sdtype": "numerical"
+        },
+        "att_328": {
+            "sdtype": "numerical"
+        },
+        "att_329": {
+            "sdtype": "numerical"
+        },
+        "att_330": {
+            "sdtype": "numerical"
+        },
+        "att_331": {
+            "sdtype": "numerical"
+        },
+        "att_332": {
+            "sdtype": "numerical"
+        },
+        "att_333": {
+            "sdtype": "numerical"
+        },
+        "att_334": {
+            "sdtype": "numerical"
+        },
+        "att_335": {
+            "sdtype": "numerical"
+        },
+        "att_336": {
+            "sdtype": "numerical"
+        },
+        "att_337": {
+            "sdtype": "numerical"
+        },
+        "att_338": {
+            "sdtype": "numerical"
+        },
+        "att_339": {
+            "sdtype": "numerical"
+        },
+        "att_340": {
+            "sdtype": "numerical"
+        },
+        "att_341": {
+            "sdtype": "numerical"
+        },
+        "att_342": {
+            "sdtype": "numerical"
+        },
+        "att_343": {
+            "sdtype": "numerical"
+        },
+        "att_344": {
+            "sdtype": "numerical"
+        },
+        "att_345": {
+            "sdtype": "numerical"
+        },
+        "att_346": {
+            "sdtype": "numerical"
+        },
+        "att_347": {
+            "sdtype": "numerical"
+        },
+        "att_348": {
+            "sdtype": "numerical"
+        },
+        "att_349": {
+            "sdtype": "numerical"
+        },
+        "att_350": {
+            "sdtype": "numerical"
+        },
+        "att_351": {
+            "sdtype": "numerical"
+        },
+        "att_352": {
+            "sdtype": "numerical"
+        },
+        "att_353": {
+            "sdtype": "numerical"
+        },
+        "att_354": {
+            "sdtype": "numerical"
+        },
+        "att_355": {
+            "sdtype": "numerical"
+        },
+        "att_356": {
+            "sdtype": "numerical"
+        },
+        "att_357": {
+            "sdtype": "numerical"
+        },
+        "att_358": {
+            "sdtype": "numerical"
+        },
+        "att_359": {
+            "sdtype": "numerical"
+        },
+        "att_360": {
+            "sdtype": "numerical"
+        },
+        "att_361": {
+            "sdtype": "numerical"
+        },
+        "att_362": {
+            "sdtype": "numerical"
+        },
+        "att_363": {
+            "sdtype": "numerical"
+        },
+        "att_364": {
+            "sdtype": "numerical"
+        },
+        "att_365": {
+            "sdtype": "numerical"
+        },
+        "att_366": {
+            "sdtype": "numerical"
+        },
+        "att_367": {
+            "sdtype": "numerical"
+        },
+        "att_368": {
+            "sdtype": "numerical"
+        },
+        "att_369": {
+            "sdtype": "numerical"
+        },
+        "att_370": {
+            "sdtype": "numerical"
+        },
+        "att_371": {
+            "sdtype": "numerical"
+        },
+        "att_372": {
+            "sdtype": "numerical"
+        },
+        "att_373": {
+            "sdtype": "numerical"
+        },
+        "att_374": {
+            "sdtype": "numerical"
+        },
+        "att_375": {
+            "sdtype": "numerical"
+        },
+        "att_376": {
+            "sdtype": "numerical"
+        },
+        "att_377": {
+            "sdtype": "numerical"
+        },
+        "att_378": {
+            "sdtype": "numerical"
+        },
+        "att_379": {
+            "sdtype": "numerical"
+        },
+        "att_380": {
+            "sdtype": "numerical"
+        },
+        "att_381": {
+            "sdtype": "numerical"
+        },
+        "att_382": {
+            "sdtype": "numerical"
+        },
+        "att_383": {
+            "sdtype": "numerical"
+        },
+        "att_384": {
+            "sdtype": "numerical"
+        },
+        "att_385": {
+            "sdtype": "numerical"
+        },
+        "att_386": {
+            "sdtype": "numerical"
+        },
+        "att_387": {
+            "sdtype": "numerical"
+        },
+        "att_388": {
+            "sdtype": "numerical"
+        },
+        "att_389": {
+            "sdtype": "numerical"
+        },
+        "att_390": {
+            "sdtype": "numerical"
+        },
+        "att_391": {
+            "sdtype": "numerical"
+        },
+        "att_392": {
+            "sdtype": "numerical"
+        },
+        "att_393": {
+            "sdtype": "numerical"
+        },
+        "att_394": {
+            "sdtype": "numerical"
+        },
+        "att_395": {
+            "sdtype": "numerical"
+        },
+        "att_396": {
+            "sdtype": "numerical"
+        },
+        "att_397": {
+            "sdtype": "numerical"
+        },
+        "att_398": {
+            "sdtype": "numerical"
+        },
+        "att_399": {
+            "sdtype": "numerical"
+        },
+        "att_400": {
+            "sdtype": "numerical"
+        },
+        "att_401": {
+            "sdtype": "numerical"
+        },
+        "att_402": {
+            "sdtype": "numerical"
+        },
+        "att_403": {
+            "sdtype": "numerical"
+        },
+        "att_404": {
+            "sdtype": "numerical"
+        },
+        "att_405": {
+            "sdtype": "numerical"
+        },
+        "att_406": {
+            "sdtype": "numerical"
+        },
+        "att_407": {
+            "sdtype": "numerical"
+        },
+        "att_408": {
+            "sdtype": "numerical"
+        },
+        "att_409": {
+            "sdtype": "numerical"
+        },
+        "att_410": {
+            "sdtype": "numerical"
+        },
+        "att_411": {
+            "sdtype": "numerical"
+        },
+        "att_412": {
+            "sdtype": "numerical"
+        },
+        "att_413": {
+            "sdtype": "numerical"
+        },
+        "att_414": {
+            "sdtype": "numerical"
+        },
+        "att_415": {
+            "sdtype": "numerical"
+        },
+        "att_416": {
+            "sdtype": "numerical"
+        },
+        "att_417": {
+            "sdtype": "numerical"
+        },
+        "att_418": {
+            "sdtype": "numerical"
+        },
+        "att_419": {
+            "sdtype": "numerical"
+        },
+        "att_420": {
+            "sdtype": "numerical"
+        },
+        "att_421": {
+            "sdtype": "numerical"
+        },
+        "att_422": {
+            "sdtype": "numerical"
+        },
+        "att_423": {
+            "sdtype": "numerical"
+        },
+        "att_424": {
+            "sdtype": "numerical"
+        },
+        "att_425": {
+            "sdtype": "numerical"
+        },
+        "att_426": {
+            "sdtype": "numerical"
+        },
+        "att_427": {
+            "sdtype": "numerical"
+        },
+        "att_428": {
+            "sdtype": "numerical"
+        },
+        "att_429": {
+            "sdtype": "numerical"
+        },
+        "att_430": {
+            "sdtype": "numerical"
+        },
+        "att_431": {
+            "sdtype": "numerical"
+        },
+        "att_432": {
+            "sdtype": "numerical"
+        },
+        "att_433": {
+            "sdtype": "numerical"
+        },
+        "att_434": {
+            "sdtype": "numerical"
+        },
+        "att_435": {
+            "sdtype": "numerical"
+        },
+        "att_436": {
+            "sdtype": "numerical"
+        },
+        "att_437": {
+            "sdtype": "numerical"
+        },
+        "att_438": {
+            "sdtype": "numerical"
+        },
+        "att_439": {
+            "sdtype": "numerical"
+        },
+        "att_440": {
+            "sdtype": "numerical"
+        },
+        "att_441": {
+            "sdtype": "numerical"
+        },
+        "att_442": {
+            "sdtype": "numerical"
+        },
+        "att_443": {
+            "sdtype": "numerical"
+        },
+        "att_444": {
+            "sdtype": "numerical"
+        },
+        "att_445": {
+            "sdtype": "numerical"
+        },
+        "att_446": {
+            "sdtype": "numerical"
+        },
+        "att_447": {
+            "sdtype": "numerical"
+        },
+        "att_448": {
+            "sdtype": "numerical"
+        },
+        "att_449": {
+            "sdtype": "numerical"
+        },
+        "att_450": {
+            "sdtype": "numerical"
+        },
+        "att_451": {
+            "sdtype": "numerical"
+        },
+        "att_452": {
+            "sdtype": "numerical"
+        },
+        "att_453": {
+            "sdtype": "numerical"
+        },
+        "att_454": {
+            "sdtype": "numerical"
+        },
+        "att_455": {
+            "sdtype": "numerical"
+        },
+        "att_456": {
+            "sdtype": "numerical"
+        },
+        "att_457": {
+            "sdtype": "numerical"
+        },
+        "att_458": {
+            "sdtype": "numerical"
+        },
+        "att_459": {
+            "sdtype": "numerical"
+        },
+        "att_460": {
+            "sdtype": "numerical"
+        },
+        "att_461": {
+            "sdtype": "numerical"
+        },
+        "att_462": {
+            "sdtype": "numerical"
+        },
+        "att_463": {
+            "sdtype": "numerical"
+        },
+        "att_464": {
+            "sdtype": "numerical"
+        },
+        "att_465": {
+            "sdtype": "numerical"
+        },
+        "att_466": {
+            "sdtype": "numerical"
+        },
+        "att_467": {
+            "sdtype": "numerical"
+        },
+        "att_468": {
+            "sdtype": "numerical"
+        },
+        "att_469": {
+            "sdtype": "numerical"
+        },
+        "att_470": {
+            "sdtype": "numerical"
+        },
+        "att_471": {
+            "sdtype": "numerical"
+        },
+        "att_472": {
+            "sdtype": "numerical"
+        },
+        "att_473": {
+            "sdtype": "numerical"
+        },
+        "att_474": {
+            "sdtype": "numerical"
+        },
+        "att_475": {
+            "sdtype": "numerical"
+        },
+        "att_476": {
+            "sdtype": "numerical"
+        },
+        "att_477": {
+            "sdtype": "numerical"
+        },
+        "att_478": {
+            "sdtype": "numerical"
+        },
+        "att_479": {
+            "sdtype": "numerical"
+        },
+        "att_480": {
+            "sdtype": "numerical"
+        },
+        "att_481": {
+            "sdtype": "numerical"
+        },
+        "att_482": {
+            "sdtype": "numerical"
+        },
+        "att_483": {
+            "sdtype": "numerical"
+        },
+        "att_484": {
+            "sdtype": "numerical"
+        },
+        "att_485": {
+            "sdtype": "numerical"
+        },
+        "att_486": {
+            "sdtype": "numerical"
+        },
+        "att_487": {
+            "sdtype": "numerical"
+        },
+        "att_488": {
+            "sdtype": "numerical"
+        },
+        "att_489": {
+            "sdtype": "numerical"
+        },
+        "att_490": {
+            "sdtype": "numerical"
+        },
+        "att_491": {
+            "sdtype": "numerical"
+        },
+        "att_492": {
+            "sdtype": "numerical"
+        },
+        "att_493": {
+            "sdtype": "numerical"
+        },
+        "att_494": {
+            "sdtype": "numerical"
+        },
+        "att_495": {
+            "sdtype": "numerical"
+        },
+        "att_496": {
+            "sdtype": "numerical"
+        },
+        "att_497": {
+            "sdtype": "numerical"
+        },
+        "att_498": {
+            "sdtype": "numerical"
+        },
+        "att_499": {
+            "sdtype": "numerical"
+        },
+        "att_500": {
+            "sdtype": "numerical"
+        },
+        "class": {
+            "sdtype": "numerical"
+        }
+    }
+}

@@ -56,7 +56,7 @@ current_dir =  root_dir + '/exp/madelon_base'
 
 train = pl.read_csv(train_file_path)
 test = pl.read_csv(test_file_path)
-
+print(train.shape)
 X = pl.concat(
     [
         train,

@@ -1,0 +1,3 @@
+             Property     Score
+0       Column Shapes  0.903801
+1  Column Pair Trends  0.887991

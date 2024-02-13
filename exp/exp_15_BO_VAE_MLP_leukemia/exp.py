@@ -40,6 +40,7 @@ param_ranges = {
     'hiden2': {'low': 50, 'high': 500},
     'latent_dim': {'low': 5, 'high': 20},
     'lr': {'low': 1e-5, 'high': 1e-3},
+    #'epochs': {'low': 1, 'high': 1}
     'epochs': {'low': 800, 'high': 4000}
 }
 n_samples = 100
@@ -107,9 +108,14 @@ z = q.rsample(sample_shape=torch.Size([n_samples]))
 # Decode z to generate fake data
 with torch.no_grad():
     pred = model.decode(z).cpu().numpy()
-
+pred_data = pred[:, :-1]  
+pred_class = pred[:, -1]  
 scaler = trainloader.dataset.standardizer
-fake_data = scaler.inverse_transform(pred)
+fake_data = scaler.inverse_transform(pred_data)  
+# Reshape pred_class to a 2D array
+pred_class_reshaped = pred_class.reshape(-1, 1)  
+# Correct stacking
+fake_data = np.hstack([fake_data, pred_class_reshaped])  
 
 # Create a DataFrame for the fake data
 # Because the generation phase output target class as float
@@ -117,7 +123,8 @@ fake_data = scaler.inverse_transform(pred)
 # and then from value > 0, coerce to 1 as class goes from 1 to 3.
 df_fake = pd.DataFrame(fake_data, columns=cols)
 df_fake[class_column] = np.round(df_fake[class_column]).astype(int)
-#df_fake[class_column] = np.where(df_fake[class_column]<1, 1, df_fake[class_column])
+df_fake[class_column] = np.where(df_fake[class_column]<1, 0, df_fake[class_column])
+df_fake[class_column] = np.where(df_fake[class_column]>=1, 1, df_fake[class_column])
 df_fake.to_csv( exp_dir + 'syndf.csv', sep=',')
 
 # Evaluation phase--------------------------------------------------------------------------
@@ -142,11 +149,11 @@ if evaluate:
     syn_score = my_report.get_score()
     syn_score_name = exp_dir + 'syn_score.txt'    
     with open(syn_score_name, 'w') as f:
-        f.write(syn_score)
+        f.write(str(syn_score))
     syn_properties = my_report.get_properties()
     syn_properties_name = exp_dir + 'syn_properties.txt'
     with open(syn_properties_name, 'w') as f:
-        f.write(syn_properties)
+        f.write(str(syn_properties))
 
     if show_quality_figs:
         fig_pair_trends = my_report.get_visualization(property_name='Column Pair Trends')
