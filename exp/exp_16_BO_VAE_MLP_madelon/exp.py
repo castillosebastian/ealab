@@ -34,14 +34,14 @@ exp_dir = root + "/exp/exp_16_BO_VAE_MLP_madelon/"
 dataset_name = 'madelon'
 class_column = 'class'
 # BO
-n_trials = 1
+n_trials = 10
 param_ranges = {
     'hiden1': {'low': 100, 'high': 1000},
     'hiden2': {'low': 50, 'high': 500},
     'latent_dim': {'low': 5, 'high': 20},
     'lr': {'low': 1e-5, 'high': 1e-3},
-    'epochs': {'low': 1, 'high': 1},
-    #'epochs': {'low': 800, 'high': 4000}    
+    #'epochs': {'low': 1, 'high': 1},
+    'epochs': {'low': 800, 'high': 4000}    
 }
 n_samples = 2000
 # Evaluate
