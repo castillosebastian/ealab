@@ -155,6 +155,49 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         test_df = test_df.to_numpy()
 
         return train_df, test_df, scaler, df, class_mapping
+    
+    elif dataset_name == 'gcm':
+        # File paths for leukemia dataset
+        train_file_path = os.path.join(root_dir, 'data', 'GCM_Training.arff')
+        test_file_path = os.path.join(root_dir, 'data', 'GCM_Test.arff')
+
+        # Load the data
+        tra, _ = arff.loadarff(train_file_path)
+        tst, _ = arff.loadarff(test_file_path)
+
+        # Convert to pandas DataFrame
+        train_df = pd.DataFrame(tra)
+        test_df = pd.DataFrame(tst)
+
+        # Decode byte strings to strings (necessary for string data in arff files)
+        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+
+        # Initialize label encoder
+        label_encoder = LabelEncoder()
+
+        # Fit label encoder and return encoded labels
+        train_df[class_column] = label_encoder.fit_transform(train_df[class_column])
+        test_df[class_column] = label_encoder.transform(test_df[class_column])
+
+        # Create a mapping dictionary for class labels
+        class_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+
+        # Combine the train and test dataframes
+        df = pd.concat([train_df, test_df], ignore_index=True)
+
+        # Standardize only the feature columns (assuming last column is label)
+        feature_columns = df.columns[df.columns != class_column]
+        #feature_columns = df.columns
+        scaler = StandardScaler()
+        train_df[feature_columns] = scaler.fit_transform(train_df[feature_columns])
+        test_df[feature_columns] = scaler.transform(test_df[feature_columns])
+
+        train_df = train_df.to_numpy()
+        test_df = test_df.to_numpy()
+
+        return train_df, test_df, scaler, df, class_mapping
+
     else:
         pass
 
