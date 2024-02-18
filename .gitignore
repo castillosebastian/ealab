@@ -3,7 +3,7 @@
 /mlruns
 /cloud
 /exp/leukemia_base/correlation_matrix.png
-*.arff
+/data/additional/
 *.pth
 *.png
 *.npy
