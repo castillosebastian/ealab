@@ -18,3 +18,5 @@ pyyaml
 bayesian-optimization
 torchvision
 urllib3
+sdmetrics
+kaleido

@@ -106,8 +106,24 @@ model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()
 
+best_train_loss = float('inf')
+epochs_no_improve = 0
+patience = 10  # Number of epochs to wait for improvement before stopping
+
 for epoch in range(1, best_params['epochs'] + 1):
-    train(epoch, model, optimizer, loss_mse, trainloader, device)
+    train_loss = train(epoch, model, optimizer, loss_mse, trainloader, device)    
+
+    # Check if test loss improved
+    if train_loss < best_train_loss:
+        best_train_loss = train_loss
+        epochs_no_improve = 0  # Reset counter
+    else:
+        epochs_no_improve += 1
+
+    # Early stopping check
+    if epochs_no_improve == patience:
+        print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
+        break
 
 torch.save(model, exp_dir + 'vautoencoder_complete.pth')
 #model = torch.load(exp_dir + 'vautoencoder_complete.pth')
