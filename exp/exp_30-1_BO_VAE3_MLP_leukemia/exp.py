@@ -3,6 +3,7 @@ import numpy as np
 import json
 import pandas as pd
 import optuna
+import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
@@ -26,24 +27,25 @@ def find_root_dir():
     return None  # Or raise an error if the root is not found
 root = find_root_dir()
 sys.path.append(root)
-from src.bo_vae2 import *
+from src.bo_vae_3L import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_24_BO_VAE2_MLP_leukemia/"
+exp_dir = root + "/exp/exp_30-1_BO_VAE3_MLP_leukemia/"
 dataset_name = 'leukemia'
 class_column = 'CLASS'
 # BO
-n_trials = 10
+n_trials = 20
 param_ranges = {
-    'hiden1': {'low': 100, 'high': 1000},
-    'hiden2': {'low': 50, 'high': 500},
-    'latent_dim': {'low': 5, 'high': 100},
+    'hiden1': {'low': 7000, 'high': 8000},
+    'hiden2': {'low': 2000, 'high': 5000},
+    'hiden3': {'low': 100, 'high': 1000},
+    'latent_dim': {'low': 50, 'high': 200},
     'lr': {'low': 1e-5, 'high': 1e-3},
     #'epochs': {'low': 1, 'high': 1}
     'epochs': {'low': 1000, 'high': 5000}
 }
-n_samples = 100
+n_samples = 144
 # Evaluate
 evaluate = False
 show_quality_figs = True
@@ -88,10 +90,9 @@ slice_plot = optuna.visualization.plot_slice(study)
 slice_plot.show()
 slice_plot.write_image(exp_dir + "slice_plot.png")
 # Plot contour of hyperparameters
-contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'latent_dim', 'lr', 'epochs'])
+contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'hiden3', 'latent_dim', 'lr', 'epochs'])
 contour_plot.show()
 contour_plot.write_image(exp_dir + "contour_plot.png")
-
 
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
@@ -99,6 +100,7 @@ print(f'Starting generation')
 model = VAutoencoder(D_in, 
                      best_params['hiden1'], 
                      best_params['hiden2'],
+                     best_params['hiden3'],  
                      best_params['latent_dim']).float().to(device)
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])

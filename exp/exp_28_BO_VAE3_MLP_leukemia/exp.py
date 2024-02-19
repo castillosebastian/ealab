@@ -35,7 +35,7 @@ exp_dir = root + "/exp/exp_28_BO_VAE3_MLP_leukemia/"
 dataset_name = 'leukemia'
 class_column = 'CLASS'
 # BO
-n_trials = 40
+n_trials = 30
 param_ranges = {
     'hiden1': {'low': 7000, 'high': 8000},
     'hiden2': {'low': 2000, 'high': 5000},
@@ -90,14 +90,18 @@ slice_plot = optuna.visualization.plot_slice(study)
 slice_plot.show()
 slice_plot.write_image(exp_dir + "slice_plot.png")
 # Plot contour of hyperparameters
-contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'latent_dim', 'lr', 'epochs'])
+contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'hiden3', 'latent_dim', 'lr', 'epochs'])
 contour_plot.show()
 contour_plot.write_image(exp_dir + "contour_plot.png")
 
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
 print(f'Starting generation')
-model = VAutoencoder(D_in, best_params['hiden1'], best_params['hiden2'], best_params['latent_dim']).float().to(device)
+model = VAutoencoder(D_in, 
+                     best_params['hiden1'], 
+                     best_params['hiden2'],
+                     best_params['hiden3'],  
+                     best_params['latent_dim']).float().to(device)
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()

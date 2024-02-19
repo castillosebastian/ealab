@@ -96,7 +96,11 @@ contour_plot.write_image(exp_dir + "contour_plot.png")
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
 print(f'Starting generation')
-model = VAutoencoder(D_in, best_params['hiden1'], best_params['hiden2'], best_params['latent_dim']).float().to(device)
+model = VAutoencoder(D_in, 
+                     best_params['hiden1'], 
+                     best_params['hiden2'],
+                     best_params['hiden3'],  
+                     best_params['latent_dim']).float().to(device)
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()

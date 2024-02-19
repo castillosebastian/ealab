@@ -3,7 +3,10 @@ import numpy as np
 import json
 import pandas as pd
 import optuna
+import matplotlib.pyplot as plt
+import seaborn as sns
 import torch
+import itertools
 from torch.utils.data import DataLoader
 from torch import nn, optim
 from sklearn.neural_network import MLPClassifier
@@ -26,24 +29,25 @@ def find_root_dir():
     return None  # Or raise an error if the root is not found
 root = find_root_dir()
 sys.path.append(root)
-from src.bo_vae2 import *
+from src.bo_vae_3L import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_24_BO_VAE2_MLP_leukemia/"
+exp_dir = root + "/exp/exp_31-1_GS_VAE3_MLP_leukemia/"
 dataset_name = 'leukemia'
 class_column = 'CLASS'
 # BO
-n_trials = 10
+n_trials = 2
 param_ranges = {
-    'hiden1': {'low': 100, 'high': 1000},
-    'hiden2': {'low': 50, 'high': 500},
-    'latent_dim': {'low': 5, 'high': 100},
+    'hiden1': {'low': 7000, 'high': 8000},
+    'hiden2': {'low': 2000, 'high': 5000},
+    'hiden3': {'low': 100, 'high': 1000},
+    'latent_dim': {'low': 50, 'high': 200},
     'lr': {'low': 1e-5, 'high': 1e-3},
-    #'epochs': {'low': 1, 'high': 1}
-    'epochs': {'low': 1000, 'high': 5000}
+    'epochs': {'low': 1, 'high': 1}
+    #'epochs': {'low': 1000, 'high': 5000}
 }
-n_samples = 100
+n_samples = 144
 # Evaluate
 evaluate = False
 show_quality_figs = True
@@ -66,32 +70,67 @@ trainloader = DataLoader(dataset=traindata_set, batch_size=1024)
 testloader = DataLoader(dataset=testdata_set, batch_size=1024)
 # Optimization phase
 print(f'Starting optimization')
-study = optuna.create_study(direction='minimize')
-study.optimize(lambda trial: objective(trial, trainloader, testloader, param_ranges=param_ranges,device=device), n_trials=n_trials)
-print(f'Optimal hyperparameters: {study.best_params}')
-# Save to a JSON file
-best_params = study.best_params
+
+# Define your grid
+hiden1_range = range(param_ranges['hiden1']['low'], param_ranges['hiden1']['high'], 500)
+hiden2_range = range(param_ranges['hiden2']['low'], param_ranges['hiden2']['high'], 500)
+hiden3_range = range(param_ranges['hiden3']['low'], param_ranges['hiden3']['high'], 100)
+latent_dim_range = range(param_ranges['latent_dim']['low'], param_ranges['latent_dim']['high'], 25)
+lr_range = np.linspace(param_ranges['lr']['low'], param_ranges['lr']['high'], 3)
+epochs_range = range(param_ranges['epochs']['low'], param_ranges['epochs']['high'], 1000)
+# Create grid
+grid = itertools.product(hiden1_range, hiden2_range, hiden3_range, latent_dim_range, lr_range, epochs_range)
+# Prepare to track results
+results = []
+# Iterate over the grid
+for hiden1, hiden2, hiden3, latent_dim, lr, epochs in grid:
+    # Initialize model, optimizer, and loss function
+    model = VAutoencoder(D_in, hiden1, hiden2, hiden3, latent_dim).float().to(device)
+    model.apply(weights_init_uniform_rule)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    loss_mse = customLoss()
+
+    # Train the model and get the final loss
+    for epoch in range(1, epochs + 1):
+        train(epoch, model, optimizer, loss_mse, trainloader, device)
+        test_loss = test(epoch, model, loss_mse, testloader, device)
+
+    # Store the results
+    results.append({
+        'hiden1': hiden1,
+        'hiden2': hiden2,
+        'hiden3': hiden3,
+        'latent_dim': latent_dim,
+        'lr': lr,
+        'epochs': epochs,
+        'test_loss': test_loss
+    })
+# Save results to a JSON file
+with open(exp_dir + 'grid_search_results.json', 'w') as f:
+    json.dump(results, f, indent=4)
+print("Grid search results saved to 'grid_search_results.json'")
+# Find the best parameters
+best_params = min(results, key=lambda x: x[-1])
+print(f'Optimal hyperparameters: {best_params}')
 with open(exp_dir + 'best_params.json', 'w') as f:
     json.dump(best_params, f, indent=4)
-print("Best parameters saved to 'best_params.json'")
+print("Best params results saved to 'best_params.json'")
 
-# Plot optimization history
-opt_history = optuna.visualization.plot_optimization_history(study)
-opt_history.show()
-opt_history.write_image(exp_dir + "opt_history.png")
-# Plot hyperparameter importance
-param_importance = optuna.visualization.plot_param_importances(study)
-param_importance.show()
-param_importance.write_image(exp_dir + "param_importance.png")
-# Plot slice
-slice_plot = optuna.visualization.plot_slice(study)
-slice_plot.show()
-slice_plot.write_image(exp_dir + "slice_plot.png")
-# Plot contour of hyperparameters
-contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'latent_dim', 'lr', 'epochs'])
-contour_plot.show()
-contour_plot.write_image(exp_dir + "contour_plot.png")
-
+# Load the results
+with open(exp_dir + 'grid_search_results.json', 'r') as f:
+    results = json.load(f)
+# Convert to DataFrame for easier manipulation
+results_df = pd.DataFrame(results)
+# Prepare the pivot table
+pivot_table = results_df.pivot_table(values='test_loss', index='hiden1', columns='hiden2', aggfunc='mean')
+plt.figure(figsize=(12, 8))
+sns.heatmap(pivot_table, annot=True, cmap='viridis', fmt=".2f")
+plt.title("Test Loss for different values of hiden1 and hiden2")
+plt.xlabel("hiden2")
+plt.ylabel("hiden1")
+# Save the plot to a file
+plt.savefig(exp_dir + 'heatmap_plot.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
@@ -99,6 +138,7 @@ print(f'Starting generation')
 model = VAutoencoder(D_in, 
                      best_params['hiden1'], 
                      best_params['hiden2'],
+                     best_params['hiden3'],  
                      best_params['latent_dim']).float().to(device)
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
