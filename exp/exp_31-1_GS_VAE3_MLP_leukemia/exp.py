@@ -4,11 +4,13 @@ import json
 import pandas as pd
 import optuna
 import matplotlib.pyplot as plt
+import plotly.express as px
 import seaborn as sns
 import torch
 import itertools
 from torch.utils.data import DataLoader
 from torch import nn, optim
+import time
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
@@ -36,18 +38,18 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 exp_dir = root + "/exp/exp_31-1_GS_VAE3_MLP_leukemia/"
 dataset_name = 'leukemia'
 class_column = 'CLASS'
+start = time.time()
 # BO
 n_trials = 2
-param_ranges = {
-    'hiden1': {'low': 7000, 'high': 8000},
-    'hiden2': {'low': 2000, 'high': 5000},
-    'hiden3': {'low': 100, 'high': 1000},
-    'latent_dim': {'low': 50, 'high': 200},
-    'lr': {'low': 1e-5, 'high': 1e-3},
-    'epochs': {'low': 1, 'high': 1}
-    #'epochs': {'low': 1000, 'high': 5000}
-}
-n_samples = 144
+# Define your grid
+hiden1_range = (1000, 3000, 7000)
+hiden2_range = (300, 900, 1500)
+hiden3_range = (20, 120, 190)
+latent_dim_range = (3, 20, 100)
+lr_range = (0.0001, 0.0003, 0.001)
+epochs = 1000
+
+n_samples = 100
 # Evaluate
 evaluate = False
 show_quality_figs = True
@@ -71,29 +73,39 @@ testloader = DataLoader(dataset=testdata_set, batch_size=1024)
 # Optimization phase
 print(f'Starting optimization')
 
-# Define your grid
-hiden1_range = range(param_ranges['hiden1']['low'], param_ranges['hiden1']['high'], 500)
-hiden2_range = range(param_ranges['hiden2']['low'], param_ranges['hiden2']['high'], 500)
-hiden3_range = range(param_ranges['hiden3']['low'], param_ranges['hiden3']['high'], 100)
-latent_dim_range = range(param_ranges['latent_dim']['low'], param_ranges['latent_dim']['high'], 25)
-lr_range = np.linspace(param_ranges['lr']['low'], param_ranges['lr']['high'], 3)
-epochs_range = range(param_ranges['epochs']['low'], param_ranges['epochs']['high'], 1000)
 # Create grid
-grid = itertools.product(hiden1_range, hiden2_range, hiden3_range, latent_dim_range, lr_range, epochs_range)
+grid = itertools.product(hiden1_range, hiden2_range, hiden3_range, latent_dim_range, lr_range)
 # Prepare to track results
 results = []
 # Iterate over the grid
-for hiden1, hiden2, hiden3, latent_dim, lr, epochs in grid:
+for hiden1, hiden2, hiden3, latent_dim, lr in grid:
+    print(f"Running for: hiden1={hiden1}, hiden2={hiden2}, hiden3={hiden3}, latent_dim={latent_dim}, lr={lr}")
     # Initialize model, optimizer, and loss function
     model = VAutoencoder(D_in, hiden1, hiden2, hiden3, latent_dim).float().to(device)
     model.apply(weights_init_uniform_rule)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    loss_mse = customLoss()
+    loss_mse = customLoss()    
 
-    # Train the model and get the final loss
+    # Training and validation process
+    best_test_loss = float('inf')
+    epochs_no_improve = 0
+    patience = 10  # Number of epochs to wait for improvement before stoppi
+        
     for epoch in range(1, epochs + 1):
         train(epoch, model, optimizer, loss_mse, trainloader, device)
         test_loss = test(epoch, model, loss_mse, testloader, device)
+
+        # Check if test loss improved
+        if test_loss < best_test_loss:
+            best_test_loss = test_loss
+            epochs_no_improve = 0  # Reset counter
+        else:
+            epochs_no_improve += 1
+
+        # Early stopping check
+        if epochs_no_improve == patience:
+            print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
+            break
 
     # Store the results
     results.append({
@@ -110,27 +122,35 @@ with open(exp_dir + 'grid_search_results.json', 'w') as f:
     json.dump(results, f, indent=4)
 print("Grid search results saved to 'grid_search_results.json'")
 # Find the best parameters
-best_params = min(results, key=lambda x: x[-1])
-print(f'Optimal hyperparameters: {best_params}')
-with open(exp_dir + 'best_params.json', 'w') as f:
-    json.dump(best_params, f, indent=4)
-print("Best params results saved to 'best_params.json'")
+if results:
+    best_params = min(results, key=lambda x: x['test_loss'])
+    print(f'Optimal hyperparameters: {best_params}')
+    with open(exp_dir + 'best_params.json', 'w') as f:
+        json.dump(best_params, f, indent=4)
+    print("Best params results saved to 'best_params.json'")
+else:
+    print("No results to analyze.")
 
 # Load the results
 with open(exp_dir + 'grid_search_results.json', 'r') as f:
     results = json.load(f)
 # Convert to DataFrame for easier manipulation
 results_df = pd.DataFrame(results)
-# Prepare the pivot table
-pivot_table = results_df.pivot_table(values='test_loss', index='hiden1', columns='hiden2', aggfunc='mean')
-plt.figure(figsize=(12, 8))
-sns.heatmap(pivot_table, annot=True, cmap='viridis', fmt=".2f")
-plt.title("Test Loss for different values of hiden1 and hiden2")
-plt.xlabel("hiden2")
-plt.ylabel("hiden1")
+# Create the Parallel Coordinates Plot
+fig = px.parallel_coordinates(results_df, 
+                              color="test_loss", 
+                              dimensions=['hiden1', 'hiden2', 'hiden3', 'latent_dim', 'lr', 'epochs'],
+                              color_continuous_scale=px.colors.diverging.Tealrose,
+                              labels={"test_loss": "Test Loss", "hiden1": "Hiden Layer 1", 
+                                      "hiden2": "Hiden Layer 2", "hiden3": "Hiden Layer 3", 
+                                      "latent_dim": "Latent Dimension", "lr": "Learning Rate", 
+                                      "epochs": "Epochs"},
+                              title="Impact of Hyperparameters on Test Loss")
+# Show the plot
+fig.show()
 # Save the plot to a file
-plt.savefig(exp_dir + 'heatmap_plot.png', dpi=300, bbox_inches='tight')
-plt.show()
+fig.write_image(f"{exp_dir}parallel_coordinates_plot.png")
+
 
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
@@ -302,4 +322,6 @@ with open(report_fake_path, 'w') as f:
 
 print("Classification reports saved.")
 
-
+time_end = time.time()
+duration = time_end - start
+print(duration)
