@@ -45,7 +45,7 @@ param_ranges = {
 }
 n_samples = 6000
 # Evaluate
-evaluate = False
+evaluate = True
 show_quality_figs = True
 # Clasify
 max_iter = 500
@@ -75,6 +75,20 @@ with open(exp_dir + 'best_params.json', 'w') as f:
     json.dump(best_params, f, indent=4)
 print("Best parameters saved to 'best_params.json'")
 
+# Plot optimization history
+opt_history = optuna.visualization.plot_optimization_history(study)
+opt_history.write_image(exp_dir + "opt_history.png")
+# Plot hyperparameter importance
+param_importance = optuna.visualization.plot_param_importances(study)
+param_importance.write_image(exp_dir + "param_importance.png")
+# Plot slice
+slice_plot = optuna.visualization.plot_slice(study)
+slice_plot.write_image(exp_dir + "slice_plot.png")
+# Plot contour of hyperparameters
+contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'latent_dim', 'lr', 'epochs'])
+contour_plot.write_image(exp_dir + "contour_plot.png")
+
+
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
 print(f'Starting generation')
@@ -82,9 +96,24 @@ model = VAutoencoder(D_in, best_params['hiden1'], best_params['hiden2'], best_pa
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()
+best_train_loss = float('inf')
+epochs_no_improve = 0
+patience = 10  # Number of epochs to wait for improvement before stopping
 
 for epoch in range(1, best_params['epochs'] + 1):
-    train(epoch, model, optimizer, loss_mse, trainloader, device)
+    train_loss = train(epoch, model, optimizer, loss_mse, trainloader, device)    
+
+    # Check if test loss improved
+    if train_loss < best_train_loss:
+        best_train_loss = train_loss
+        epochs_no_improve = 0  # Reset counter
+    else:
+        epochs_no_improve += 1
+
+    # Early stopping check
+    if epochs_no_improve == patience:
+        print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
+        break
 
 torch.save(model, exp_dir + 'vautoencoder_complete.pth')
 #model = torch.load(exp_dir + 'vautoencoder_complete.pth')
@@ -162,9 +191,9 @@ if evaluate:
         fig_shapes = my_report.get_visualization(property_name='Column Shapes')
         fig_shapes.write_image(exp_dir+ "shapes.pdf")
 
-        if show_quality_figs:
-            fig_pair_trends.show()
-            fig_shapes.show()
+        # if show_quality_figs:
+        #     fig_pair_trends.show()
+        #     fig_shapes.show()
 
         my_report.save(filepath= exp_dir + 'demo_data_quality_report.pkl')
 
