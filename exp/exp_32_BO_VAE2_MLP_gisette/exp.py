@@ -3,7 +3,6 @@ import numpy as np
 import json
 import pandas as pd
 import optuna
-import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
@@ -31,20 +30,20 @@ from src.bo_vae2 import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_25_BO_VAE3_MLP_leukemia/"
-dataset_name = 'leukemia'
-class_column = 'CLASS'
+exp_dir = root + "/exp/exp_32_BO_VAE2_MLP_gisette/"
+dataset_name = 'gisette'
+class_column = 'class'
 # BO
 n_trials = 10
 param_ranges = {
-    'hiden1': {'low': 100, 'high': 1000},
-    'hiden2': {'low': 100, 'high': 800},
-    'latent_dim': {'low': 50, 'high': 300},
-    'lr': {'low': 1e-7, 'high': 1e-3},
+    'hiden1': {'low': 3000, 'high': 5000},
+    'hiden2': {'low': 1000, 'high': 3000},
+    'latent_dim': {'low': 5, 'high': 300},
+    'lr': {'low': 1e-5, 'high': 1e-3},
     #'epochs': {'low': 1, 'high': 1}
     'epochs': {'low': 1000, 'high': 5000}
 }
-n_samples = 100
+n_samples = 6000
 # Evaluate
 evaluate = False
 show_quality_figs = True
@@ -76,30 +75,10 @@ with open(exp_dir + 'best_params.json', 'w') as f:
     json.dump(best_params, f, indent=4)
 print("Best parameters saved to 'best_params.json'")
 
-# Plot optimization history
-opt_history = optuna.visualization.plot_optimization_history(study)
-opt_history.show()
-opt_history.write_image(exp_dir + "opt_history.png")
-# Plot hyperparameter importance
-param_importance = optuna.visualization.plot_param_importances(study)
-param_importance.show()
-param_importance.write_image(exp_dir + "param_importance.png")
-# Plot slice
-slice_plot = optuna.visualization.plot_slice(study)
-slice_plot.show()
-slice_plot.write_image(exp_dir + "slice_plot.png")
-# Plot contour of hyperparameters
-contour_plot = optuna.visualization.plot_contour(study, params=['hiden1', 'hiden2', 'latent_dim', 'lr', 'epochs'])
-contour_plot.show()
-contour_plot.write_image(exp_dir + "contour_plot.png")
-
 # Generation phase------------------------------------------------------------------------------
 print('-'*100)
 print(f'Starting generation')
-model = VAutoencoder(D_in, 
-                     best_params['hiden1'], 
-                     best_params['hiden2'],                     
-                     best_params['latent_dim']).float().to(device)
+model = VAutoencoder(D_in, best_params['hiden1'], best_params['hiden2'], best_params['latent_dim']).float().to(device)
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()
