@@ -45,8 +45,8 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         test_df = pd.DataFrame(tst)
 
         # Decode byte strings to strings (necessary for string data in arff files)
-        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
-        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        train_df = train_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
 
         # Initialize label encoder
         label_encoder = LabelEncoder()
@@ -87,8 +87,8 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         test_df = pd.DataFrame(tst)
 
         # Decode byte strings to strings (necessary for string data in arff files)
-        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
-        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        train_df = train_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
 
         # Initialize label encoder
         label_encoder = LabelEncoder()
@@ -128,8 +128,8 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         test_df = pd.DataFrame(tst)
 
         # Decode byte strings to strings (necessary for string data in arff files)
-        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
-        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        train_df = train_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
 
         # Initialize label encoder
         label_encoder = LabelEncoder()
@@ -170,8 +170,8 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         test_df = pd.DataFrame(tst)
 
         # Decode byte strings to strings (necessary for string data in arff files)
-        train_df = train_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
-        test_df = test_df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+        train_df = train_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
+        test_df = test_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
 
         # Initialize label encoder
         label_encoder = LabelEncoder()
