@@ -38,10 +38,10 @@ num_classes = 2
 # BO
 n_trials = 200
 param_ranges = {
-    'hiden1': {'low': 3000, 'high': 7000},
-    'hiden2': {'low': 1000, 'high': 2900},
-    'hiden3': {'low': 10, 'high': 100},
-    'latent_dim': {'low': 5, 'high': 200},
+    'hiden1': {'low': 5000, 'high': 7000},
+    'hiden2': {'low': 2000, 'high': 4000},
+    'hiden3': {'low': 200, 'high': 1000},
+    'latent_dim': {'low': 5, 'high': 100},
     'lr': {'low': 1e-5, 'high': 1e-3},
     'epochs': {'low': 100, 'high': 5000}
     #'epochs': {'low': 800, 'high': 4000}
