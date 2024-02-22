@@ -34,19 +34,19 @@ exp_dir = root + "/exp/exp_24_BO_VAE2_MLP_leukemia/"
 dataset_name = 'leukemia'
 class_column = 'CLASS'
 # BO
-n_trials = 10
+n_trials = 100
 param_ranges = {
-    'hiden1': {'low': 100, 'high': 1000},
-    'hiden2': {'low': 50, 'high': 500},
+    'hiden1': {'low': 3000, 'high': 7000},
+    'hiden2': {'low': 300, 'high': 2000},
     'latent_dim': {'low': 5, 'high': 100},
     'lr': {'low': 1e-5, 'high': 1e-3},
     #'epochs': {'low': 1, 'high': 1}
     'epochs': {'low': 1000, 'high': 5000}
 }
-n_samples = 100
+n_samples = 140
 # Evaluate
 evaluate = False
-show_quality_figs = True
+show_quality_figs = False
 # Clasify
 max_iter = 500
 
@@ -103,9 +103,24 @@ model = VAutoencoder(D_in,
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()
+best_train_loss = float('inf')
+epochs_no_improve = 0
+patience = 10  # Number of epochs to wait for improvement before stopping
 
 for epoch in range(1, best_params['epochs'] + 1):
-    train(epoch, model, optimizer, loss_mse, trainloader, device)
+    train_loss = train(epoch, model, optimizer, loss_mse, trainloader, device)    
+
+    # Check if test loss improved
+    if train_loss < best_train_loss:
+        best_train_loss = train_loss
+        epochs_no_improve = 0  # Reset counter
+    else:
+        epochs_no_improve += 1
+
+    # Early stopping check
+    if epochs_no_improve == patience:
+        print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
+        break
 
 torch.save(model, exp_dir + 'vautoencoder_complete.pth')
 #model = torch.load(exp_dir + 'vautoencoder_complete.pth')
