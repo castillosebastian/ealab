@@ -43,7 +43,7 @@ param_ranges = {
     #'epochs': {'low': 1, 'high': 1}
     'epochs': {'low': 1000, 'high': 5000}
 }
-n_samples = 150
+n_samples = 190
 # Evaluate
 evaluate = True
 show_quality_figs = True
@@ -151,8 +151,11 @@ fake_data = np.hstack([fake_data, pred_class_reshaped])
 # and then from value > 0, coerce to 1 as class goes from 1 to 3.
 df_fake = pd.DataFrame(fake_data, columns=cols)
 df_fake[class_column] = np.round(df_fake[class_column]).astype(int)
-df_fake[class_column] = np.where(df_fake[class_column]<1, 0, df_fake[class_column])
-df_fake[class_column] = np.where(df_fake[class_column]>=1, 1, df_fake[class_column])
+class_counts = df_fake['class'].value_counts()
+print(f'class counts {class_counts}')      
+# df_fake[class_column] = np.where(df_fake[class_column]<1, 0, df_fake[class_column])
+# df_fake[class_column] = np.where(df_fake[class_column]>=1, 1, df_fake[class_column])
+
 df_fake.to_csv( exp_dir + 'syndf.csv', sep=',')
 
 # Evaluation phase--------------------------------------------------------------------------
