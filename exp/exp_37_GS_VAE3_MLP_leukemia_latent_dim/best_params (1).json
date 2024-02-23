@@ -1,0 +1,9 @@
+{
+    "hiden1": 50,
+    "hiden2": 30,
+    "hiden3": 20,
+    "latent_dim": 3,
+    "lr": 0.0001,
+    "epochs": 1000,
+    "test_loss": 22363.40625
+}

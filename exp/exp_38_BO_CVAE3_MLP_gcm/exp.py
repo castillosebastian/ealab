@@ -31,14 +31,14 @@ from src.bo_cvae_3L import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_34_BO_CVAE3_MLP_leukemia/"
-dataset_name = 'leukemia'
-class_column = 'CLASS'
-num_classes = 2
+exp_dir = root + "/exp/exp_38_BO_CVAE3_MLP_gcm/"
+dataset_name = 'gcm'
+class_column = 'class'
+num_classes = 14
 # BO
 n_trials = 200
 param_ranges = {
-    'hiden1': {'low': 5000, 'high': 7000},
+    'hiden1': {'low': 5000, 'high': 15000},
     'hiden2': {'low': 2000, 'high': 4000},
     'hiden3': {'low': 200, 'high': 1000},
     'latent_dim': {'low': 5, 'high': 100},
@@ -46,7 +46,7 @@ param_ranges = {
     'epochs': {'low': 100, 'high': 5000}
     #'epochs': {'low': 800, 'high': 4000}
 }
-n_samples = 140
+n_samples = 150
 # Evaluate
 evaluate = False
 show_quality_figs = False
