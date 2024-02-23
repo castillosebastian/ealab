@@ -1,0 +1,2 @@
+class maping: {b'Bladder': 0, b'Breast': 1, b'CNS': 2, b'Colorectal': 3, b'Leukemia': 4, b'Lung': 5, b'Lymphoma': 6, b'Melanoma': 7,
+b'Mesothelioma': 8, b'Ovary': 9, b'Pancreas': 10, b'Prostate': 11, b'Renal': 12, b'Uterus__Adeno': 13}

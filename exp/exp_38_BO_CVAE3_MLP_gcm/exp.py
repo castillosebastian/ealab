@@ -36,9 +36,9 @@ dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
 # BO
-n_trials = 200
+n_trials = 2
 param_ranges = {
-    'hiden1': {'low': 5000, 'high': 15000},
+    'hiden1': {'low': 5000, 'high': 8000},
     'hiden2': {'low': 2000, 'high': 4000},
     'hiden3': {'low': 200, 'high': 1000},
     'latent_dim': {'low': 5, 'high': 100},
@@ -46,7 +46,7 @@ param_ranges = {
     'epochs': {'low': 100, 'high': 5000}
     #'epochs': {'low': 800, 'high': 4000}
 }
-n_samples = 150
+n_samples = 190
 # Evaluate
 evaluate = False
 show_quality_figs = False
@@ -59,6 +59,7 @@ print('-'*100)
 print(f'Starting data access')
 train_df, test_df, scaler, df_base, class_mapping = load_and_standardize_data_thesis(root, dataset_name, class_column)
 print(f'Data set dimensions: {df_base.shape}')
+print(f'class maping: {class_mapping}')
 cols = df_base.columns
 D_in = train_df.shape[1]
 traindata_set = DataBuilder(root, dataset_name, class_column, num_classes, train=True)
@@ -156,7 +157,7 @@ sigma = torch.exp(logvar / 2)
 q = torch.distributions.Normal(mu.mean(dim=0), sigma.mean(dim=0))
 # samples to generate
 n_samples_per_label = int(n_samples/num_classes)  # Number of samples you want to generate per label
-labels = [0, 1]  # The two labels you want to condition on
+labels = [0, 1,2,3,4,5,6,7,8,9,10,11,12,13]  
 # Initialize an empty list to hold the generated data
 generated_data = []
 
