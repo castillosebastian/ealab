@@ -45,7 +45,7 @@ param_ranges = {
 }
 n_samples = 190
 # Evaluate
-evaluate = True
+evaluate = False
 show_quality_figs = True
 # Clasify
 max_iter = 500

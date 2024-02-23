@@ -36,7 +36,7 @@ dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
 # BO
-n_trials = 2
+n_trials = 20
 param_ranges = {
     'hiden1': {'low': 5000, 'high': 8000},
     'hiden2': {'low': 2000, 'high': 4000},
@@ -184,7 +184,8 @@ df_fake = np.concatenate(generated_data, axis=0)
 # And when there is no 0 class, coerce 0 to 1 .
 df_fake = pd.DataFrame(df_fake, columns=cols)
 df_fake[class_column] = np.round(df_fake[class_column]).astype(int)
-#df_fake[class_column] = np.where(df_fake[class_column]<1, 1, df_fake[class_column])
+class_counts = df_fake['class'].value_counts()
+print(f'class counts {class_counts}')      
 df_fake.to_csv( exp_dir + 'syndf.csv', sep=',')
 
 # Evaluation phase--------------------------------------------------------------------------
