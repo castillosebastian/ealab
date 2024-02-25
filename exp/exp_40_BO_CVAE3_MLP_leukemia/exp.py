@@ -31,14 +31,14 @@ from src.bo_cvae_3L import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_39_BO_CVAE3_MLP_gcm/"
-dataset_name = 'gcm'
-class_column = 'class'
-num_classes = 14
+exp_dir = root + "/exp/exp_40_BO_CVAE3_MLP_leukemia/"
+dataset_name = 'leukemia'
+class_column = 'CLASS'
+num_classes = 2
 # BO
-n_trials = 20
+n_trials = 10
 param_ranges = {
-    'hiden1': {'low': 5000, 'high': 8000},
+    'hiden1': {'low': 5000, 'high': 7000},
     'hiden2': {'low': 2000, 'high': 4000},
     'hiden3': {'low': 200, 'high': 1000},
     'latent_dim': {'low': 5, 'high': 100},
@@ -46,7 +46,7 @@ param_ranges = {
     'epochs': {'low': 100, 'high': 5000}
     #'epochs': {'low': 800, 'high': 4000}
 }
-n_samples = 1400
+n_samples = 300
 # Evaluate
 evaluate = False
 show_quality_figs = False
@@ -59,7 +59,6 @@ print('-'*100)
 print(f'Starting data access')
 train_df, test_df, scaler, df_base, class_mapping = load_and_standardize_data_thesis(root, dataset_name, class_column)
 print(f'Data set dimensions: {df_base.shape}')
-print(f'class maping: {class_mapping}')
 cols = df_base.columns
 D_in = train_df.shape[1]
 traindata_set = DataBuilder(root, dataset_name, class_column, num_classes, train=True)
@@ -157,7 +156,7 @@ sigma = torch.exp(logvar / 2)
 q = torch.distributions.Normal(mu.mean(dim=0), sigma.mean(dim=0))
 # samples to generate
 n_samples_per_label = int(n_samples/num_classes)  # Number of samples you want to generate per label
-labels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]  
+labels = [0, 1]  # The two labels you want to condition on
 # Initialize an empty list to hold the generated data
 generated_data = []
 
@@ -184,8 +183,9 @@ df_fake = np.concatenate(generated_data, axis=0)
 # And when there is no 0 class, coerce 0 to 1 .
 df_fake = pd.DataFrame(df_fake, columns=cols)
 df_fake[class_column] = np.round(df_fake[class_column]).astype(int)
-class_counts = df_fake['class'].value_counts()
+class_counts = df_fake['CLASS'].value_counts()
 print(f'class counts {class_counts}')      
+#df_fake[class_column] = np.where(df_fake[class_column]<1, 1, df_fake[class_column])
 df_fake.to_csv( exp_dir + 'syndf.csv', sep=',')
 
 # Evaluation phase--------------------------------------------------------------------------
