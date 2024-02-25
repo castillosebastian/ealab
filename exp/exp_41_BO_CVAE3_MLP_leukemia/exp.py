@@ -103,8 +103,7 @@ print(f'Starting generation')
 model = CVAE(input_size= trainloader.dataset.data.shape[1],
              labels_length=num_classes, 
              H1=best_params['hiden1'], 
-             H2=best_params['hiden2'],
-             H3=best_params['hiden3'],
+             H2=best_params['hiden2'],             
              latent_dim=best_params['latent_dim']).float().to(device)
 model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
