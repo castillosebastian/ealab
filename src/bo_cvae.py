@@ -240,6 +240,8 @@ class CVAE(nn.Module):
         self.fc_bn1 = nn.BatchNorm1d(num_features=H)
         self.fc2 = nn.Linear(H, H2)
         self.fc_bn2 = nn.BatchNorm1d(num_features=H2)
+        self.fc2_repeat = nn.Linear(H2, H2)  # Repeated layer in encoder
+        self.fc_bn2_repeat = nn.BatchNorm1d(num_features=H2)  
         
         # Latent vectors mu and sigma
         self.fc21 = nn.Linear(H2, latent_dim)
@@ -248,6 +250,8 @@ class CVAE(nn.Module):
         # Decoder
         self.fc3 = nn.Linear(latent_dim + labels_length, adjusted_hidden_size)
         self.fc_bn3 = nn.BatchNorm1d(num_features=adjusted_hidden_size)
+        self.fc3_repeat = nn.Linear(adjusted_hidden_size, adjusted_hidden_size)  # Repeated layer in decoder
+        self.fc_bn3_repeat = nn.BatchNorm1d(num_features=adjusted_hidden_size)  
         self.fc4 = nn.Linear(adjusted_hidden_size, H)
         self.fc_bn4 = nn.BatchNorm1d(num_features=H)
         self.fc5 = nn.Linear(H, input_size)
@@ -258,11 +262,13 @@ class CVAE(nn.Module):
         combined = torch.cat((x, labels), 1)
         x = self.relu(self.fc_bn1(self.fc1(combined)))
         x = self.relu(self.fc_bn2(self.fc2(x)))
+        x = self.relu(self.fc_bn2_repeat(self.fc2_repeat(x)))  # Passing through the repeated layer
         return self.fc21(x), self.fc22(x)
 
     def decode(self, z, labels):
         z = torch.cat((z, labels), 1)
         z = self.relu(self.fc_bn3(self.fc3(z)))
+        z = self.relu(self.fc_bn3_repeat(self.fc3_repeat(z)))  # Passing through the repeated layer
         z = self.relu(self.fc_bn4(self.fc4(z)))
         return torch.sigmoid(self.fc5(z))
 
