@@ -374,7 +374,7 @@ def objective(trial,trainloader,testloader, param_ranges=None, device = 'cpu', n
         # Training and validation process
         best_test_loss = float('inf')
         epochs_no_improve = 0
-        patience = 2000  # Number of epochs to wait for improvement before stopping
+        patience = 10  # Number of epochs to wait for improvement before stopping
 
         for epoch in range(1, epochs + 1):
             train(epoch, model, optimizer, loss_mse, trainloader, device)
