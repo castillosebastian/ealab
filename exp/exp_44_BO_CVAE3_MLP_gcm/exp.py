@@ -31,17 +31,17 @@ from src.bo_cvae import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_43_BO_CVAE3_MLP_gcm/"
+exp_dir = root + "/exp/exp_44_BO_CVAE3_MLP_gcm/"
 dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
 # BO
-n_trials = 20
+n_trials = 40
 param_ranges = {
     'hiden1': {'low': 200, 'high': 500},
     'hiden2': {'low': 100, 'high': 200},    
-    'latent_dim': {'low': 5, 'high': 40},
-    'lr': {'low': 1e-5, 'high': 1e-3},
+    'latent_dim': {'low': 5, 'high': 20},
+    'lr': {'low': 1e-6 ,'high': 1e-3},
     'epochs': {'low': 100, 'high': 5000}    
 }
 n_samples = 400
