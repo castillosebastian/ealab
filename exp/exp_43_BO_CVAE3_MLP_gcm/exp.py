@@ -36,11 +36,11 @@ dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
 # BO
-n_trials = 2
+n_trials = 20
 param_ranges = {
-    'hiden1': {'low': 200, 'high': 500},
-    'hiden2': {'low': 100, 'high': 200},    
-    'latent_dim': {'low': 5, 'high': 80},
+    'hiden1': {'low': 3000, 'high': 4000},
+    'hiden2': {'low': 1000, 'high': 2000},    
+    'latent_dim': {'low': 5, 'high': 120},
     'lr': {'low': 1e-5, 'high': 1e-3},
     'epochs': {'low': 100, 'high': 5000}    
 }
