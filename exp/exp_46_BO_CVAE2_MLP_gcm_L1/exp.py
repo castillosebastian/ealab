@@ -27,11 +27,11 @@ def find_root_dir():
     return None  # Or raise an error if the root is not found
 root = find_root_dir()
 sys.path.append(root)
-from src.bo_cvae import *
+from src.bo_cvae_L1loss import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_45_BO_CVAE3_MLP_gcm/"
+exp_dir = root + "/exp/exp_46_BO_CVAE2_MLP_gcm_L1/"
 dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
