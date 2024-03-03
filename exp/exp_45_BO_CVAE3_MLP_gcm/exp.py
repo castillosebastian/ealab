@@ -36,7 +36,7 @@ dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
 # BO
-n_trials = 2
+n_trials = 10
 param_ranges = {
     'hiden1': {'low': 200, 'high': 500},
     'hiden2': {'low': 100, 'high': 200},    
