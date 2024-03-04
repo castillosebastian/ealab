@@ -31,16 +31,16 @@ from src.bo_cvae_dropout import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters----------------------------------------------------------------------------------
-exp_dir = root + "/exp/exp_49_BO_CVAE2_MLP_gcm_dropout/"
+exp_dir = root + "/exp/exp_50_BO_CVAE2_MLP_gcm_dropout_bignet/"
 dataset_name = 'gcm'
 class_column = 'class'
 num_classes = 14
 # BO
 n_trials = 10
 param_ranges = {
-    'hiden1': {'low': 200, 'high': 500},
-    'hiden2': {'low': 100, 'high': 200},    
-    'latent_dim': {'low': 5, 'high': 80},
+    'hiden1': {'low': 3000, 'high': 7000},
+    'hiden2': {'low': 1000, 'high': 2500},    
+    'latent_dim': {'low': 5, 'high': 120},
     'lr': {'low': 1e-5, 'high': 1e-3},
     'epochs': {'low': 100, 'high': 5000},
     'dropout_rate':  {'low': 0.05, 'high': 0.5}
