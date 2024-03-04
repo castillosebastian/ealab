@@ -226,9 +226,8 @@ class DataBuilder(Dataset):
     def __len__(self):
         return len(self.data)
 
-
 class CVAE(nn.Module):
-    def __init__(self, input_size, labels_length, H=50, H2=12, latent_dim=3):
+    def __init__(self, input_size, labels_length, H=50, H2=12, latent_dim=3, dropout_rate=0.5):
         super(CVAE, self).__init__()
         
         # Adjusted sizes to include label information
@@ -240,8 +239,11 @@ class CVAE(nn.Module):
         self.fc_bn1 = nn.BatchNorm1d(num_features=H)
         self.fc2 = nn.Linear(H, H2)
         self.fc_bn2 = nn.BatchNorm1d(num_features=H2)
-        self.fc2_repeat = nn.Linear(H2, H2)  # Repeated layer in encoder
-        self.fc_bn2_repeat = nn.BatchNorm1d(num_features=H2)  
+        self.fc2_repeat = nn.Linear(H2, H2)
+        self.fc_bn2_repeat = nn.BatchNorm1d(num_features=H2)
+        
+        # Dropout layers after each activation
+        self.dropout = nn.Dropout(dropout_rate)
         
         # Latent vectors mu and sigma
         self.fc21 = nn.Linear(H2, latent_dim)
@@ -250,8 +252,8 @@ class CVAE(nn.Module):
         # Decoder
         self.fc3 = nn.Linear(latent_dim + labels_length, adjusted_hidden_size)
         self.fc_bn3 = nn.BatchNorm1d(num_features=adjusted_hidden_size)
-        self.fc3_repeat = nn.Linear(adjusted_hidden_size, adjusted_hidden_size)  # Repeated layer in decoder
-        self.fc_bn3_repeat = nn.BatchNorm1d(num_features=adjusted_hidden_size)  
+        self.fc3_repeat = nn.Linear(adjusted_hidden_size, adjusted_hidden_size)
+        self.fc_bn3_repeat = nn.BatchNorm1d(num_features=adjusted_hidden_size)
         self.fc4 = nn.Linear(adjusted_hidden_size, H)
         self.fc_bn4 = nn.BatchNorm1d(num_features=H)
         self.fc5 = nn.Linear(H, input_size)
@@ -260,16 +262,16 @@ class CVAE(nn.Module):
 
     def encode(self, x, labels):
         combined = torch.cat((x, labels), 1)
-        x = self.relu(self.fc_bn1(self.fc1(combined)))
-        x = self.relu(self.fc_bn2(self.fc2(x)))
-        x = self.relu(self.fc_bn2_repeat(self.fc2_repeat(x)))  # Passing through the repeated layer
+        x = self.dropout(self.relu(self.fc_bn1(self.fc1(combined))))
+        x = self.dropout(self.relu(self.fc_bn2(self.fc2(x))))
+        x = self.dropout(self.relu(self.fc_bn2_repeat(self.fc2_repeat(x))))  # Applying dropout after repeated layer
         return self.fc21(x), self.fc22(x)
 
     def decode(self, z, labels):
         z = torch.cat((z, labels), 1)
-        z = self.relu(self.fc_bn3(self.fc3(z)))
-        z = self.relu(self.fc_bn3_repeat(self.fc3_repeat(z)))  # Passing through the repeated layer
-        z = self.relu(self.fc_bn4(self.fc4(z)))
+        z = self.dropout(self.relu(self.fc_bn3(self.fc3(z))))
+        z = self.dropout(self.relu(self.fc_bn3_repeat(self.fc3_repeat(z))))  # Applying dropout after repeated layer
+        z = self.dropout(self.relu(self.fc_bn4(self.fc4(z))))
         return torch.sigmoid(self.fc5(z))
 
     def reparameterize(self, mu, logvar):
@@ -282,21 +284,16 @@ class CVAE(nn.Module):
         z = self.reparameterize(mu, logvar)
         return self.decode(z, labels), mu, logvar
 
-
-class CustomLoss(nn.Module):
+class customLoss(nn.Module):
     def __init__(self):
-        super(CustomLoss, self).__init__()
-        # Use L1Loss instead of MSELoss
-        self.l1_loss = nn.L1Loss(reduction="sum")
+        super(customLoss, self).__init__()
+        self.mse_loss = nn.MSELoss(reduction="sum")
 
     def forward(self, x_recon, x, mu, logvar):
-        # Compute the L1 loss instead of MSE
-        loss_L1 = self.l1_loss(x_recon, x)
-        # Kullback-Leibler divergence remains unchanged
+        loss_MSE = self.mse_loss(x_recon, x)
         loss_KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
-        return loss_L1 + loss_KLD
-
+        return loss_MSE + loss_KLD
 
 def weights_init_uniform_rule(m):
     classname = m.__class__.__name__
@@ -366,14 +363,15 @@ def objective(trial,trainloader,testloader, param_ranges=None, device = 'cpu', n
         hiden2 = trial.suggest_int('hiden2', param_ranges['hiden2']['low'], param_ranges['hiden2']['high'])
         latent_dim = trial.suggest_int('latent_dim', param_ranges['latent_dim']['low'], param_ranges['latent_dim']['high'])
         lr = trial.suggest_float('lr', param_ranges['lr']['low'], param_ranges['lr']['high'])
-        epochs = trial.suggest_int('epochs', param_ranges['epochs']['low'], param_ranges['epochs']['high'])        
+        epochs = trial.suggest_int('epochs', param_ranges['epochs']['low'], param_ranges['epochs']['high'])
+        dropout_rate = trial.suggest_int('dropout_rate', param_ranges['dropout_rate']['low'], param_ranges['dropout_rate']['high'])          
         D_in = trainloader.dataset.data.shape[1]
         
         # Initialize model, optimizer, and loss function with suggested values
-        model = CVAE(input_size=D_in, labels_length=num_classes, H=hiden1, H2=hiden2,latent_dim=latent_dim).float().to(device)
+        model = CVAE(input_size=D_in, labels_length=num_classes, H=hiden1, H2=hiden2,latent_dim=latent_dim, dropout_rate=dropout_rate).float().to(device)
         model.apply(weights_init_uniform_rule)
         optimizer = optim.Adam(model.parameters(), lr=lr)
-        loss_mse = CustomLoss()
+        loss_mse = customLoss()
 
         # Training and validation process
         best_test_loss = float('inf')
