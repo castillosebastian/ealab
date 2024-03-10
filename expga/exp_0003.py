@@ -23,11 +23,11 @@ sys.path.append(root)
 from src.ga_base import *
 
 # params
-experiment_name = "madelon_base_0002"
-description = "basic madelon ga"
+experiment_name = "gisette_base_0003"
+description = "basic gisette ga"
 current_dir = root +  "/expga/"
-train_dir = root + "/data/madelon.trn.arff"
-test_dir = root + "/data/madelon.tst.arff"
+train_dir = root + "/data/gisette_train.arff"
+test_dir = root + "/data/gisette_test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
 PROB_MUT = 20.0         # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
