@@ -1,0 +1,8 @@
+{
+    "hiden1": 4600,
+    "hiden2": 1386,
+    "latent_dim": 105,
+    "lr": 4.6553553904033615e-05,
+    "epochs": 1705,
+    "dropout_rate": 0
+}

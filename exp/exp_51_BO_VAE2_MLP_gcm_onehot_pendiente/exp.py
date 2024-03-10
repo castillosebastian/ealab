@@ -34,11 +34,11 @@ exp_dir = root + "/exp/exp_33_BO_VAE2_MLP_gcm/"
 dataset_name = 'gcm'
 class_column = 'class'
 # BO
-n_trials = 2
+n_trials = 10
 param_ranges = {
-    'hiden1': {'low': 100, 'high': 150},
-    'hiden2': {'low': 80, 'high':100 },
-    'latent_dim': {'low': 5, 'high': 40},
+    'hiden1': {'low': 5000, 'high': 10000},
+    'hiden2': {'low': 1500, 'high': 4900},
+    'latent_dim': {'low': 20, 'high': 1400},
     'lr': {'low': 1e-5, 'high': 1e-3},
     #'epochs': {'low': 1, 'high': 1}
     'epochs': {'low': 1000, 'high': 5000}
@@ -138,9 +138,6 @@ with torch.no_grad():
     pred = model.decode(z).cpu().numpy()
 pred_data = pred[:, :-1]  
 pred_class = pred[:, -1]  
-
-print(pred_class)
-
 scaler = trainloader.dataset.standardizer
 fake_data = scaler.inverse_transform(pred_data)  
 # Reshape pred_class to a 2D array
