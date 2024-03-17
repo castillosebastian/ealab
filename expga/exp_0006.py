@@ -236,6 +236,19 @@ with mlflow.start_run(experiment_id=experiment_id, run_name=experiment_name) as 
         # ============================
         records = mstats.compile(pop)
         logbook.record(gen=g, **records)
+
+        file_path = f"{current_dir}/{experiment_name}.txt"
+        with open(file_path, 'a') as file:
+            if g % 1 == 0:
+                file.write("=" * 79 + "\n")
+                file.write(f"GENERATION: {g}\n")
+                file.write(
+                    f"Elite -- Fitness: {elite.fitness.values[0]:.4} -- NGENES: {np.sum(elite)} -- Acc: {elite.acc:.4}\n"
+                )
+                file.write("Poblacion FITNES: " + str(records["fitness"]) + "\n")
+                file.write("Poblacion ACC: " + str(records["acc"]) + "\n")
+                file.write("Poblacion GENES: " + str(records["ngenes"]) + "\n")
+                file.write("#" * 79 + "\n")
         if g % 1 == 0:
             print("=" * 79)
             print(f"GENERATION: {g}")
