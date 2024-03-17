@@ -34,7 +34,7 @@ test_dir = root + "/data/leukemia_test_34x7129.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
 PROB_MUT = 0.1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 100               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 
 
 Xtrain, y_train, Xtest, y_test = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
