@@ -20,3 +20,4 @@ torchvision
 urllib3
 sdmetrics
 kaleido
+dagshub

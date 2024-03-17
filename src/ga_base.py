@@ -114,7 +114,7 @@ def fitness(features, Xtrain, Xtest, y_train, y_test):
     return f, acc, n_genes
 # =================================
 def plot_evolution(logbook, chapter, y_label,filename=None, 
-                   N_override=None, current_dir = None, experiment_name=None, GMAX = 10):
+                   N_override=None, current_dir = None, experiment_name=None, GMAX = 100):
     """
     Plot the evolution of a given statistic (chapter) from the logbook.
     Parameters:

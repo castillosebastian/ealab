@@ -24,9 +24,8 @@ from src.ga_base import *
 import dagshub
 dagshub.init(repo_owner='castilloclaudiosebastian', repo_name='ealab', mlflow=True)
 
-
 # params
-experiment_name = "madelon_base_0002"
+experiment_name = "madelon_base_0005"
 description = "basic madelon ga"
 current_dir = root +  "/expga/"
 train_dir = root + "/data/madelon.trn.arff"

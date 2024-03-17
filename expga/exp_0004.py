@@ -26,7 +26,7 @@ dagshub.init(repo_owner='castilloclaudiosebastian', repo_name='ealab', mlflow=Tr
 
 
 # params
-experiment_name = "gisette_base_0003"
+experiment_name = "gisette_base_0004"
 description = "basic gisette ga"
 current_dir = root +  "/expga/"
 train_dir = root + "/data/gisette_train.arff"
@@ -34,7 +34,7 @@ test_dir = root + "/data/gisette_test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
 PROB_MUT = 0.1         # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 100               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 
 
 Xtrain, y_train, Xtest, y_test = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
