@@ -54,7 +54,7 @@ with mlflow.start_run(experiment_id=experiment_id, run_name=experiment_name) as 
     # Log parameters
     mlflow.log_params({
         "POP_SIZE": POP_SIZE,
-        "PROB_MUT": PROB_MUT,
+        "PROB_MUT": PM,
         "PX": PX,
         "GMAX": GMAX,
     })

@@ -21,6 +21,9 @@ def find_root_dir():
 root = find_root_dir()
 sys.path.append(root)
 from src.ga_base import *
+import dagshub
+dagshub.init(repo_owner='castilloclaudiosebastian', repo_name='ealab', mlflow=True)
+
 
 # params
 experiment_name = "gisette_base_0003"
@@ -29,9 +32,9 @@ current_dir = root +  "/expga/"
 train_dir = root + "/data/gisette_train.arff"
 test_dir = root + "/data/gisette_test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
-PROB_MUT = 20.0         # Probabilidad de mutacion
+PROB_MUT = 0.1         # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 10               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 100               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 
 
 Xtrain, y_train, Xtest, y_test = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
@@ -39,7 +42,7 @@ Xtrain, y_train, Xtest, y_test = load_and_preprocess_data(train_dir=train_dir, t
                                                             class_value_1="1")
 
 IND_SIZE = Xtrain.shape[1]  # Cantidad de genes en el cromosoma
-PM = PROB_MUT / IND_SIZE    # Probabilidad de mutación [aproximadamente 1 gen por cromosoma]
+PM = PROB_MUT * IND_SIZE    # Probabilidad de mutación [aproximadamente 1 gen por cromosoma]
                             # Experimento 4: con mayor probabilidad de mutación.
                             # PM = 20./IND_SIZE __experimento 2 mejoró el fitness y acc en 
                             # la segunda generación pero luego se estancó
