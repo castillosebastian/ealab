@@ -127,7 +127,7 @@ def plot_evolution(logbook, chapter, y_label,filename=None,
     avg = chapter_data.select("avg")
     max_ = chapter_data.select("max")
     min_ = chapter_data.select("min")
-    N = N_override if N_override else (30 if GMAX > 200 else GMAX)
+    N = N_override if N_override else GMAX
     
     fig, ax = plt.subplots(1, 1, figsize=(20, 6))
     generations = range(N)
