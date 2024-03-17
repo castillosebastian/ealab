@@ -263,16 +263,18 @@ with mlflow.start_run(experiment_id=experiment_id, run_name=experiment_name) as 
     fitness_plot_path = plot_evolution(logbook, "fitness", "Fitness", 
                                        current_dir=current_dir, 
                                        experiment_name=experiment_name,
-                                       filename="fitness_evolution.png")
+                                       filename="fitness_evolution.png", 
+                                       GMAX = GMAX)
     acc_plot_path = plot_evolution(logbook, "acc", "Accuracy", 
                                    current_dir=current_dir, 
                                    experiment_name=experiment_name,
-                                   filename="accuracy_evolution.png")
+                                   filename="accuracy_evolution.png", 
+                                   GMAX = GMAX)
     genes_plot_path = plot_evolution(logbook, "ngenes", "Number of Genes",
                                     experiment_name=experiment_name,
                                     filename="genes_evolution.png", 
                                     current_dir=current_dir, 
-                                    N_override=100 if GMAX > 2000 else GMAX)
+                                    N_override= GMAX)
 
     if fitness_plot_path:
         mlflow.log_artifact(fitness_plot_path, "plots")
