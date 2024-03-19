@@ -24,14 +24,15 @@ from src.ga_base import *
 import dagshub
 dagshub.init(repo_owner='castilloclaudiosebastian', repo_name='ealab', mlflow=True)
 
+
 # params
-experiment_name = "madelon_base_0005"
-description = "basic madelon ga"
+experiment_name = "gisette_base_0007"
+description = "basic gisette ga"
 current_dir = root +  "/expga/"
-train_dir = root + "/data/madelon.trn.arff"
-test_dir = root + "/data/madelon.tst.arff"
+train_dir = root + "/data/gisette_train.arff"
+test_dir = root + "/data/gisette_test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
-PROB_MUT = 0.1        # Probabilidad de mutacion
+PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
 GMAX = 100               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 
@@ -41,8 +42,10 @@ Xtrain, y_train, Xtest, y_test = load_and_preprocess_data(train_dir=train_dir, t
                                                             class_value_1="1")
 
 IND_SIZE = Xtrain.shape[1]  # Cantidad de genes en el cromosoma
-PM = IND_SIZE * PROB_MUT   # Probabilidad de mutación [aproximadamente 0.1 gen por cromosoma]
-
+PM = PROB_MUT / IND_SIZE    # Probabilidad de mutación [aproximadamente 1 gen por cromosoma]
+                            # Experimento 4: con mayor probabilidad de mutación.
+                            # PM = 20./IND_SIZE __experimento 2 mejoró el fitness y acc en 
+                            # la segunda generación pero luego se estancó
 try:
     experiment_id = mlflow.create_experiment(experiment_name)
 except mlflow.exceptions.MlflowException:
@@ -272,7 +275,7 @@ with mlflow.start_run(experiment_id=experiment_id, run_name=experiment_name) as 
     fitness_plot_path = plot_evolution(logbook, "fitness", "Fitness", 
                                        current_dir=current_dir, 
                                        experiment_name=experiment_name,
-                                       filename="fitness_evolution.png", 
+                                       filename="fitness_evolution.png",
                                        GMAX = GMAX)
     acc_plot_path = plot_evolution(logbook, "acc", "Accuracy", 
                                    current_dir=current_dir, 
