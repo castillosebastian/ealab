@@ -36,9 +36,9 @@ test_dir = root + "/data/leukemia_test_34x7129.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
 PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 10               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 20               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
-nexperiments = 1
+nexperiments = 30
 # params vae
 best_params = {
     'hiden1': 346,
@@ -171,8 +171,25 @@ model.apply(weights_init_uniform_rule)
 optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
 loss_mse = customLoss()
 
+best_test_loss = float('inf')
+epochs_no_improve = 0
+patience = 10  # Number of epochs to wait for improvement before stopping
+
 for epoch in range(1, best_params['epochs'] + 1):
-    train(epoch, model, optimizer, loss_mse, trainloader, device)   
+    train(epoch, model, optimizer, loss_mse, trainloader, device)
+    test_loss = test(epoch, model, loss_mse, testloader, device)
+
+    # Check if test loss improved
+    if test_loss < best_test_loss:
+        best_test_loss = test_loss
+        epochs_no_improve = 0  # Reset counter
+    else:
+        epochs_no_improve += 1
+
+    # Early stopping check
+    if epochs_no_improve == patience:
+        print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
+        break
 
 with torch.no_grad():
     mus, logvars = [], []
@@ -211,7 +228,7 @@ y_test = np.concatenate((y_test, pred_class_test))
 print(f'Xtrain augmented ({int(n_samples*0.7)}): {Xtrain.shape}')
 print(f'Xtrain augmented ({int(n_samples*0.3)}): {Xtest.shape}')
 print(f'y_train augmented ({int(n_samples*0.7)}): {y_train.shape}')
-print(f'y_test original ({int(n_samples*0.3)}): {y_test.shape}')
+print(f'y_test augmented ({int(n_samples*0.3)}): {y_test.shape}')
 
 for nexperiment in range(0, nexperiments):    
 
