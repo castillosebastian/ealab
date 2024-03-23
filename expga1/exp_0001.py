@@ -136,9 +136,8 @@ for nexperiment in range(0, nexperiments):
     logbook = tools.Logbook()
 
     # Corremos el modelo con todas las features
-    f = fitness(np.ones(Xtrain.shape[1]), Xtrain, Xtest, y_train, y_test)
-    print(f"All features: FITNESS: {f[0]:.4} -- NGENES: {int(Xtrain.shape[1])} -- Acc: {f[1]:.4}\n")
-
+    if nexperiment == 0:
+        allf = fitness(np.ones(Xtrain.shape[1]), Xtrain, Xtest, y_train, y_test)        
     # ================================================
     # INICIALIZAMOS LA POBLACIÓN
     # ================================================
@@ -301,8 +300,11 @@ for nexperiment in range(0, nexperiments):
         'PROB_MUT': round(PROB_MUT, 3),
         'PX': round(PX, 3),
         'GMAX': GMAX,
-        'DAT_SIZE': DAT_SIZE,
-        'IND_SIZE': IND_SIZE,
+        'DAT_SIZE': DAT_SIZE,       
+
+        'all_features_fitness': round(allf[0], 3), 
+        'all_feature_ngenes': IND_SIZE, 
+        'all_feature_acc': round(allf[1], 3),
 
         'elite_fitness': round(elite.fitness.values[0], 3),
         'elite_ngenes': np.sum(elite),
