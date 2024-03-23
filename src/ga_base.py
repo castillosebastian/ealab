@@ -41,6 +41,8 @@ def load_and_preprocess_data(train_dir, test_dir, class_column_name=None, class_
     # Convert to pandas DataFrames
     train = pd.DataFrame(tra)
     test = pd.DataFrame(tst)
+
+    features = list(train.columns)
     
     # Ensure the class label column is in string format for consistency
     train[class_column_name] = train[class_column_name].astype(str)
@@ -61,7 +63,7 @@ def load_and_preprocess_data(train_dir, test_dir, class_column_name=None, class_
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    return X_train_scaled, y_train, X_test_scaled, y_test
+    return X_train_scaled, y_train, X_test_scaled, y_test, features
 
 # Funciones
 # =================================
