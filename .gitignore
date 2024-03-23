@@ -9,8 +9,34 @@
 *.npy
 *.gz
 *.pkl
-*.csv
 data/MNIST/raw/t10k-images-idx3-ubyte
 data/MNIST/raw/t10k-labels-idx1-ubyte
 data/MNIST/raw/train-images-idx3-ubyte
 data/MNIST/raw/train-labels-idx1-ubyte
+exp/exp_19_BO_CVAE_MLP_gisette/syndf.csv
+exp/exp_20_BO_VAE_MLP_gcm/syndf.csv
+exp/exp_21_BO_CVAE_MLP_gcm/syndf.csv
+exp/exp_22_BO_VAE2_MLP_leukemia/syndf.csv
+exp/exp_23_BO_VAE2.1_MLP_leukemia/syndf.csv
+exp/exp_24_BO_VAE2_MLP_leukemia/syndf.csv
+exp/exp_25_BO_VAE3_MLP_leukemia/syndf.csv
+exp/exp_26_BO_VAE3_MLP_leukemia/syndf.csv
+exp/exp_27_BO_VAE3_MLP_leukemia/syndf.csv
+exp/exp_28_BO_VAE3_MLP_leukemia/syndf.csv
+exp/exp_29_BO_CVAE3_MLP_leukemia/syndf.csv
+exp/exp_30-1_BO_VAE3_MLP_leukemia/syndf.csv
+exp/exp_31-1_GS_VAE3_MLP_leukemia/syndf.csv
+exp/exp_31-1_GS_VAE3_MLP_leukemia copy/syndf.csv
+exp/exp_31_BO_VAE2_MLP_Madelon/syndf.csv
+exp/exp_32_BO_VAE2_MLP_gisette/syndf.csv
+exp/exp_33_BO_VAE2_MLP_gcm/syndf.csv
+exp/exp_34_BO_CVAE3_MLP_leukemia/syndf.csv
+exp/exp_35_BO_VAE2_MLP_leukemia_latent_dim/syndf.csv
+exp/exp_36_BO_VAE2_MLP_leukemia_latent_dim/syndf.csv
+exp/exp_37_GS_VAE3_MLP_leukemia_latent_dim/syndf (1).csv
+exp/exp_38_BO_CVAE3_MLP_gcm/syndf_trial2.csv
+exp/exp_38_BO_CVAE3_MLP_gcm/syndf.csv
+exp/exp_39_BO_CVAE3_MLP_gcm/syndf.csv
+exp/exp_42_BO_CVAE3_MLP_gcm/syndf.csv
+exp/exp_43_BO_CVAE3_MLP_gcm/syndf.csv
+exp/gcm_base_allfeatures/classifiers_AUC_v2.csv
