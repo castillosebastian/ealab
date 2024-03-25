@@ -60,7 +60,7 @@ print(f'y_train original {y_train.shape}')
 print(f'y_test original {y_test.shape}')
 
 
-DAT_SIZE = Xtrain.shape[0]  # Cantidad de genes en el cromosoma
+DAT_SIZE = Xtrain.shape[0]  
 IND_SIZE = Xtrain.shape[1]  # Cantidad de genes en el cromosoma
 PM = PROB_MUT / IND_SIZE    # Probabilidad de mutación [aproximadamente 1 gen por cromosoma]
                             # Experimento 4: con mayor probabilidad de mutación.
@@ -224,6 +224,7 @@ Xtrain = np.vstack((Xtrain, pred_data_train))
 Xtest = np.vstack((Xtest, pred_data_test))
 y_train = np.concatenate((y_train, pred_class_train))
 y_test = np.concatenate((y_test, pred_class_test))
+DAT_SIZE = Xtrain.shape[0]  
 
 print(f'Xtrain augmented ({int(n_samples*0.7)}): {Xtrain.shape}')
 print(f'Xtrain augmented ({int(n_samples*0.3)}): {Xtest.shape}')
