@@ -51,8 +51,8 @@ n_samples = 2000
 
 # data
 Xtrain, y_train, Xtest, y_test, features = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
-                                                            class_column_name='CLASS', 
-                                                            class_value_1='ALL')
+                                                            class_column_name='class', 
+                                                            class_value_1='1')
 
 print(f'Xtrain original {Xtrain.shape}')
 print(f'Xtest original {Xtest.shape}')
