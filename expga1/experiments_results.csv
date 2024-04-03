@@ -59,3 +59,6 @@ leukemia_base_0002_26,2024-03-24,multiexperiments_with_syn100VAE,/root/ealab/exp
 leukemia_base_0002_27,2024-03-24,multiexperiments_with_syn100VAE,/root/ealab/expga1,100,1,0.75,20,38,0.453,7129,0.906,0.95,713,1.0,0.95,1.0,713.0,0.0,0.0,0.0,0.95,1.0,713
 leukemia_base_0002_28,2024-03-24,multiexperiments_with_syn100VAE,/root/ealab/expga1,100,1,0.75,20,38,0.453,7129,0.906,0.952,688,1.0,0.952,1.0,688.0,0.0,0.0,0.0,0.952,1.0,688
 leukemia_base_0002_29,2024-03-24,multiexperiments_with_syn100VAE,/root/ealab/expga1,100,1,0.75,20,38,0.453,7129,0.906,0.95,707,1.0,0.95,1.0,707.0,0.0,0.0,0.0,0.95,1.0,707
+leukemia_base_0003_0,2024-03-31,3experiments_with_syn1000VAE,/root/ealab/expga1,100,1,0.75,20,738,0.496,7129,0.991,0.954,634,0.997,0.954,0.997,634.0,0.001,0.003,0.141,0.954,0.997,635
+leukemia_base_0003_1,2024-03-31,3experiments_with_syn1000VAE,/root/ealab/expga1,100,1,0.75,20,738,0.496,7129,0.991,0.954,660,1.0,0.954,1.0,660.0,0.0,0.0,0.0,0.954,1.0,660
+leukemia_base_0003_2,2024-03-31,3experiments_with_syn1000VAE,/root/ealab/expga1,100,1,0.75,20,738,0.496,7129,0.991,0.954,657,1.0,0.954,1.0,657.0,0.0,0.0,0.0,0.954,1.0,657
