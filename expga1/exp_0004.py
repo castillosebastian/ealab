@@ -36,7 +36,7 @@ test_dir = root + "/data/madelon.tst.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
 PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 20               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
 nexperiments = 10
 # params vae
