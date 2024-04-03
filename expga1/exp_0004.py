@@ -31,6 +31,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 experiment_name = "mandelon_base_0004"
 description = "3experiments_with_syn1000VAE"
 current_dir = root +  "/expga1"
+dataset_name = "madelon"
+class_column = "class"
+class_1 = "1"
 train_dir = root + "/data/madelon.trn.arff"
 test_dir = root + "/data/madelon.tst.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
@@ -51,8 +54,8 @@ n_samples = 2000
 
 # data
 Xtrain, y_train, Xtest, y_test, features = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
-                                                            class_column_name='class', 
-                                                            class_value_1='1')
+                                                            class_column_name=class_column, 
+                                                            class_value_1=class_1)
 
 print(f'Xtrain original {Xtrain.shape}')
 print(f'Xtest original {Xtest.shape}')
@@ -151,8 +154,6 @@ mstats.register("max", np.max)
 # Load and process data
 print('-'*100)
 print(f'Starting data access')
-dataset_name = 'leukemia'
-class_column = 'CLASS'
 train_df, test_df, scaler, df_base, class_mapping = load_and_standardize_data_thesis(root, dataset_name, class_column)
 cols = df_base.columns
 D_in = train_df.shape[1]
