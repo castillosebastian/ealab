@@ -1,0 +1,2 @@
+Number of variables with correlation above 70%: 80742
+Percentage of the feature space with correlation above 70%: 0.32%
