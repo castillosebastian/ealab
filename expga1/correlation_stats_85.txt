@@ -1,0 +1,2 @@
+Number of variables with correlation above 85%: 2704
+Percentage of the feature space with correlation above 85%: 0.01%
