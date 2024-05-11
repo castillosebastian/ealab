@@ -29,7 +29,7 @@ def load_and_standardize_data(path):
     return X_train, X_test, scaler, df
 
 
-def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
+def load_and_standardize_data_thesis(root_dir, dataset_name, class_column, selected_features=False):
 
     if dataset_name == 'leukemia':
         # File paths for leukemia dataset
@@ -43,6 +43,20 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
         # Convert to pandas DataFrame
         train_df = pd.DataFrame(tra)
         test_df = pd.DataFrame(tst)
+
+        if selected_features:
+            # read selected features from file /home/sebacastillo/ealab/data/features_occurrence.csv
+            selected_features = pd.read_csv('/home/sebacastillo/ealab/data/features_occurrence.csv')
+            # order the features by occurrence
+            selected_features = selected_features.sort_values(by='count', ascending=False)
+            # select the top 30 features
+            selected_features = selected_features.head(30)
+            selected_features = selected_features['selected_features_bin'].tolist()
+            # add the class column
+            selected_features.append(class_column)
+            train_df = train_df[selected_features]
+            test_df = test_df[selected_features]
+
 
         # Decode byte strings to strings (necessary for string data in arff files)
         train_df = train_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
@@ -203,8 +217,8 @@ def load_and_standardize_data_thesis(root_dir, dataset_name, class_column):
 
 
 class DataBuilder(Dataset):
-    def __init__(self, root, datasetname, classcolumn,  train=True):
-        self.X_train, self.X_test, self.standardizer, _, _ = load_and_standardize_data_thesis(root_dir=root, dataset_name=datasetname, class_column=classcolumn)
+    def __init__(self, root, datasetname, classcolumn,  train=True, selected_features=False):
+        self.X_train, self.X_test, self.standardizer, _, _ = load_and_standardize_data_thesis(root_dir=root, dataset_name=datasetname, class_column=classcolumn, selected_features=selected_features)
         if train:
             self.x = torch.from_numpy(self.X_train)
             self.len=self.x.shape[0]

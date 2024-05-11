@@ -33,7 +33,7 @@ def find_dirs():
         root_dir = os.path.dirname(root_dir)    
     return current_dir, None  # Return current directory and None if root is not found
 
-def load_and_preprocess_data(train_dir, test_dir, class_column_name=None, class_value_1=None):
+def load_and_preprocess_data(train_dir, test_dir, class_column_name=None, class_value_1=None, selected_features=False):  
     # Load the data
     tra, _ = arff.loadarff(train_dir)
     tst, _ = arff.loadarff(test_dir)
@@ -42,6 +42,20 @@ def load_and_preprocess_data(train_dir, test_dir, class_column_name=None, class_
     train = pd.DataFrame(tra)
     test = pd.DataFrame(tst)
 
+    if selected_features:
+        # read selected features from file /home/sebacastillo/ealab/data/features_occurrence.csv
+        selected_features = pd.read_csv('/home/sebacastillo/ealab/data/features_occurrence.csv')
+        # order the features by occurrence
+        selected_features = selected_features.sort_values(by='count', ascending=False)
+        # select the top 30 features
+        selected_features = selected_features.head(30)
+        selected_features = selected_features['selected_features_bin'].tolist()
+        # add the class column
+        selected_features.append(class_column_name)
+        train = train[selected_features]
+        test = test[selected_features]
+
+    # Get the column names
     features = list(train.columns)
     
     # Ensure the class label column is in string format for consistency

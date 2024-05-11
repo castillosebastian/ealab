@@ -89,7 +89,7 @@ toolbox = base.Toolbox()
 # DEFINIMOS COMO CONSTRUIR UN GEN
 # el algoritmo retiene la historia de fitnes de genes activos, contribuyendo !!!IMPORTANTE
 # a la selección de las variables que contribuyen a mejorar el fitness
-toolbox.register("attribute", bin, p=0.1)  # Nombre con el que se registra el componente
+toolbox.register("attribute", bin, p=0.01)  # Nombre con el que se registra el componente
 
 # DEFINIMOS COMO CONSTRUIR UN INDIVIDUO/CROMOSOMA
 toolbox.register(
