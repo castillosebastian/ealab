@@ -19,7 +19,7 @@ if 'CLASS' in data.columns:
 corr_matrix = data.corr()
 
 # Define a high correlation threshold
-threshold = 0.9
+threshold = 0.7
 
 # Create a mask for the upper triangle
 mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
