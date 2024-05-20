@@ -28,7 +28,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 # params
-experiment_name = "gisette_base_0005"
+experiment_name = "gisette_base_0020"
 description = "experiments_with_syn1000VAE"
 current_dir = root +  "/expga1"
 dataset_name = "gisette"
@@ -41,7 +41,7 @@ PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
 GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
-nexperiments = 30
+nexperiments = 12
 # params vae
 best_params = {
     "hiden1": 3870,
@@ -50,7 +50,7 @@ best_params = {
     "lr": 0.0009460907601722566,
     "epochs": 2739
 }
-n_samples = 6000
+
 
 # data
 Xtrain, y_train, Xtest, y_test, features = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
