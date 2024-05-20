@@ -28,29 +28,29 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 # params
-experiment_name = "mandelon_synthetic_0016"
-description = "3experiments_with_syn2000VAE_0005xgene"
+experiment_name = "gisette_base_0005"
+description = "experiments_with_syn1000VAE"
 current_dir = root +  "/expga1"
-dataset_name = "madelon"
+dataset_name = "gisette"
 class_column = "class"
 class_1 = "1"
-train_dir = root + "/data/madelon.trn.arff"
-test_dir = root + "/data/madelon.tst.arff"
+train_dir = root + "/data/gisette_train.arff"
+test_dir = root + "/data/gisette_test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
 PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 20               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
 nexperiments = 30
 # params vae
 best_params = {
-    'hiden1': 835,
-    'hiden2': 308,
-    'latent_dim': 25,
-    'lr': 0.00015503766948351942,
-    "epochs": 1364        
+    "hiden1": 3870,
+    "hiden2": 2987,
+    "latent_dim": 18,
+    "lr": 0.0009460907601722566,
+    "epochs": 2739
 }
-n_samples = 2000
+n_samples = 6000
 
 # data
 Xtrain, y_train, Xtest, y_test, features = load_and_preprocess_data(train_dir=train_dir, test_dir=test_dir,
@@ -92,7 +92,7 @@ toolbox = base.Toolbox()
 # DEFINIMOS COMO CONSTRUIR UN GEN
 # el algoritmo retiene la historia de fitnes de genes activos, contribuyendo !!!IMPORTANTE
 # a la selección de las variables que contribuyen a mejorar el fitness
-toolbox.register("attribute", bin, p=0.005)  # Nombre con el que se registra el componente
+toolbox.register("attribute", bin, p=0.1)  # Nombre con el que se registra el componente
 
 # DEFINIMOS COMO CONSTRUIR UN INDIVIDUO/CROMOSOMA
 toolbox.register(
@@ -151,86 +151,7 @@ mstats.register("max", np.max)
 
 
 # Generate synthetic data---------------------------------------------------------------------------
-# Load and process data
-print('-'*100)
-print(f'Starting data access')
-train_df, test_df, scaler, df_base, class_mapping = load_and_standardize_data_thesis(root, dataset_name, class_column)
-cols = df_base.columns
-D_in = train_df.shape[1]
-traindata_set = DataBuilder(root, dataset_name, class_column, train=True)
-testdata_set = DataBuilder(root, dataset_name, class_column, train=False)
-print(f'Train data after scale and encode class: {traindata_set.x}')
-trainloader = DataLoader(dataset=traindata_set, batch_size=1024)
-testloader = DataLoader(dataset=testdata_set, batch_size=1024)
-print('-'*100)
-print(f'Starting generation')
-model = VAutoencoder(D_in, 
-                     best_params['hiden1'], 
-                     best_params['hiden2'],                     
-                     best_params['latent_dim']).float().to(device)
-model.apply(weights_init_uniform_rule)
-optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
-loss_mse = customLoss()
-
-best_test_loss = float('inf')
-epochs_no_improve = 0
-patience = 10  # Number of epochs to wait for improvement before stopping
-
-for epoch in range(1, best_params['epochs'] + 1):
-    train(epoch, model, optimizer, loss_mse, trainloader, device)
-    test_loss = test(epoch, model, loss_mse, testloader, device)
-
-    # Check if test loss improved
-    if test_loss < best_test_loss:
-        best_test_loss = test_loss
-        epochs_no_improve = 0  # Reset counter
-    else:
-        epochs_no_improve += 1
-
-    # Early stopping check
-    if epochs_no_improve == patience:
-        print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
-        break
-
-with torch.no_grad():
-    mus, logvars = [], []
-    for data in testloader:
-        data = data.float().to(device)
-        recon_batch, mu, logvar = model(data)
-        mus.append(mu)
-        logvars.append(logvar)
-    mu = torch.cat(mus, dim=0)
-    logvar = torch.cat(logvars, dim=0)
-
-# Calculate sigma: a concise way to calculate the standard deviation σ from log-variance
-sigma = torch.exp(logvar / 2)
-# Sample z from q
-q = torch.distributions.Normal(mu.mean(dim=0), sigma.mean(dim=0))
-z = q.rsample(sample_shape=torch.Size([n_samples]))
-# Decode z to generate fake data
-with torch.no_grad():
-    pred = model.decode(z).cpu().numpy()
-pred_data = pred[:, :-1]  
-pred_class = pred[:, -1]  
-pred_class = np.where( np.round(pred_class).astype(int) < 1, 0, 1)
-# split
-total_rows = pred_data.shape[0]
-split_index = int(total_rows * 0.7)  # Calculate the index at 70% of the length
-pred_data_train = pred_data[:split_index]
-pred_data_test = pred_data[split_index:]
-pred_class_train = pred_class[:split_index]
-pred_class_test = pred_class[split_index:]
-
-Xtrain = np.vstack((Xtrain, pred_data_train))
-Xtest = np.vstack((Xtest, pred_data_test))
-y_train = np.concatenate((y_train, pred_class_train))
-y_test = np.concatenate((y_test, pred_class_test))
-DAT_SIZE = Xtrain.shape[0]  
-
-print(f'Xtrain augmented ({int(n_samples*0.7)}): {Xtrain.shape}')
-print(f'Xtrain augmented ({int(n_samples*0.3)}): {Xtest.shape}')
-print(f'y_train augmented ({int(n_samples*0.7)}): {y_train.shape}')
-print(f'y_test augmented ({int(n_samples*0.3)}): {y_test.shape}')
+# NO
 
 for nexperiment in range(0, nexperiments):    
 
