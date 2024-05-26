@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import polars as pl
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.neural_network import MLPClassifier
 import mlflow
 import mlflow.sklearn
@@ -78,6 +78,54 @@ def load_and_preprocess_data(train_dir, test_dir, class_column_name=None, class_
     X_test_scaled = scaler.transform(X_test)
     
     return X_train_scaled, y_train, X_test_scaled, y_test, features
+
+
+def load_and_preprocess_gcm_data(train_dir, test_dir, class_column=None):  
+    # Load the data
+    tra, _ = arff.loadarff(train_dir)
+    tst, _ = arff.loadarff(test_dir)
+    
+    # Convert to pandas DataFrame
+    train_df = pd.DataFrame(tra)
+    test_df = pd.DataFrame(tst)
+
+    # Get the column names
+    features = list(train_df.columns)
+    
+    # Decode byte strings to strings (necessary for string data in arff files)
+    train_df = train_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
+    test_df = test_df.apply(lambda x: x.decode() if isinstance(x, bytes) else x)
+
+    # Initialize label encoder
+    label_encoder = LabelEncoder()
+
+    # Fit label encoder and return encoded labels    
+    train_df[class_column] = label_encoder.fit_transform(train_df[class_column])
+    test_df[class_column] = label_encoder.transform(test_df[class_column])
+
+    # Create a mapping dictionary for class labels
+    class_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+
+    # Combine the train and test dataframes
+    df = pd.concat([train_df, test_df], ignore_index=True)
+
+    # Standardize only the feature columns (assuming last column is label)
+    feature_columns = df.columns[df.columns != class_column]
+    scaler = StandardScaler()
+    train_df[feature_columns] = scaler.fit_transform(train_df[feature_columns])
+    test_df[feature_columns] = scaler.transform(test_df[feature_columns])
+
+    # Separate the features and target variables
+    X_train_scaled = train_df[feature_columns].to_numpy()
+    y_train = train_df[class_column].to_numpy()
+    X_test_scaled = test_df[feature_columns].to_numpy()
+    y_test = test_df[class_column].to_numpy()
+    
+    return X_train_scaled, y_train, X_test_scaled, y_test, features, class_mapping
+
+
+
+
 
 # Funciones
 # =================================
