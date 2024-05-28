@@ -28,8 +28,8 @@ from src.bo_cvae import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # params
-experiment_name = "gcm_base_0027"
-description = "experiments_synthetic_data"
+experiment_name = "gcm_base_0028"
+description = "experiments_synthetic_data_30samples"
 current_dir = root +  "/expga1"
 dataset_name = "gcm"
 class_column = "class"
@@ -40,9 +40,9 @@ PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
 GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
-nexperiments = 20
+nexperiments = 5
 num_classes = 14
-n_samples = 200
+n_samples = 30
 max_iter = 1000
 # params vae
 best_params = {

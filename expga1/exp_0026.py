@@ -39,7 +39,7 @@ PROB_MUT = 1        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
 GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
-nexperiments = 30
+nexperiments = 20
 # params vae
 best_params = {
     'hiden1': 358,
