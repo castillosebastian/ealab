@@ -42,7 +42,7 @@ GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el 
 top_features_totrack = 200 
 nexperiments = 5
 num_classes = 14
-n_samples = 30
+n_samples = 1400
 max_iter = 1000
 # params vae
 best_params = {
@@ -177,7 +177,7 @@ loss_mse = customLoss()
  # Training and validation process
 best_test_loss = float('inf')
 epochs_no_improve = 0
-patience = 10  # Number of epochs to wait for improvement before stopping
+patience = 50  # Number of epochs to wait for improvement before stopping
 epochs = max_iter
 for epoch in range(1, epochs + 1):
     train(epoch, model, optimizer, loss_mse, trainloader, device)
@@ -254,19 +254,19 @@ y = df_fake[class_column]
 X_train_fake, X_test_fake, y_train_fake, y_test_fake = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # Test generation
-
-# Train a classifier with the synthetic data and test on the X_test_fake
-X_train_fake_gen = scaler.transform(X_train_fake)
-X_test_fake_gen = scaler.transform(X_test_fake)
-
-from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, accuracy_score
 
+# Scale the data
+scaler = StandardScaler()
+X_train_fake_scaled = scaler.fit_transform(X_train_fake)  # Fit on training data
+X_test_fake_scaled = scaler.transform(X_test_fake)        # Transform test data
+
 def create_mlp_model():
     # Define your MLP model
-    # Adjust the parameters according to your needs
     model = MLPClassifier(hidden_layer_sizes=(500, 200, 100), max_iter=200, alpha=0.001,
                           solver='adam', verbose=10, random_state=42)
     return model
@@ -278,10 +278,10 @@ pipeline_fake = Pipeline([
 ])
 
 # Train the model on the synthetic data
-pipeline_fake.fit(X_train_fake_gen, y_train_fake)
+pipeline_fake.fit(X_train_fake_scaled, y_train_fake)
 
 # Evaluate on the test set
-y_pred_fake = pipeline_fake.predict(X_test_fake_gen)
+y_pred_fake = pipeline_fake.predict(X_test_fake_scaled)
 
 # Generate classification report
 report_fake = classification_report(y_test_fake, y_pred_fake)
