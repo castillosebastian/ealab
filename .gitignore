@@ -41,3 +41,5 @@ exp/exp_42_BO_CVAE3_MLP_gcm/syndf.csv
 exp/exp_43_BO_CVAE3_MLP_gcm/syndf.csv
 exp/gcm_base_allfeatures/classifiers_AUC_v2.csv
 expga1/experiments.json
+expga1/experiments_transicion1_2.json
+
