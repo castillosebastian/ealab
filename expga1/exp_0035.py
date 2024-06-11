@@ -28,7 +28,7 @@ from src.bo_cvae import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # params
-experiment_name = "gcm_base_0034"
+experiment_name = "gcm_base_0035"
 description = "gene01_trainwithsynandoriginal_mut16"
 current_dir = root +  "/expga1"
 dataset_name = "gcm"
@@ -90,7 +90,7 @@ toolbox = base.Toolbox()
 # DEFINIMOS COMO CONSTRUIR UN GEN
 # el algoritmo retiene la historia de fitnes de genes activos, contribuyendo !!!IMPORTANTE
 # a la selección de las variables que contribuyen a mejorar el fitness
-toolbox.register("attribute", bin, p=0.05)  # Nombre con el que se registra el componente
+toolbox.register("attribute", bin, p=0.1)  # Nombre con el que se registra el componente
 
 # DEFINIMOS COMO CONSTRUIR UN INDIVIDUO/CROMOSOMA
 toolbox.register(

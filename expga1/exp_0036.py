@@ -28,7 +28,7 @@ from src.bo_cvae import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # params
-experiment_name = "gcm_base_0034"
+experiment_name = "gcm_base_0036"
 description = "gene01_trainwithsynandoriginal_mut16"
 current_dir = root +  "/expga1"
 dataset_name = "gcm"
@@ -36,9 +36,9 @@ class_column = "class"
 train_dir = root + "/data/GCM_Training.arff"
 test_dir = root + "/data/GCM_Test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
-PROB_MUT = 16        # Probabilidad de mutacion
+PROB_MUT = 160        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
-GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
+GMAX = 20               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
 nexperiments = 5
 num_classes = 14
@@ -90,7 +90,7 @@ toolbox = base.Toolbox()
 # DEFINIMOS COMO CONSTRUIR UN GEN
 # el algoritmo retiene la historia de fitnes de genes activos, contribuyendo !!!IMPORTANTE
 # a la selección de las variables que contribuyen a mejorar el fitness
-toolbox.register("attribute", bin, p=0.05)  # Nombre con el que se registra el componente
+toolbox.register("attribute", bin, p=0.1)  # Nombre con el que se registra el componente
 
 # DEFINIMOS COMO CONSTRUIR UN INDIVIDUO/CROMOSOMA
 toolbox.register(

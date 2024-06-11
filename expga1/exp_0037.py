@@ -3,7 +3,6 @@ import csv
 import numpy as np
 from datetime import datetime
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 import json
 from deap import (base)  # Estructura que permite agrupar todos los componentes de nuestro algoritmo en una misma bolsa
@@ -24,26 +23,23 @@ def find_root_dir():
 root = find_root_dir()
 sys.path.append(root)
 from src.ga_base import *
-from src.bo_cvae import *
+from src.bo_vae2 import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # params
-experiment_name = "gcm_base_0034"
-description = "gene01_trainwithsynandoriginal_mut16"
+experiment_name = "gcm_base_0026"
+description = "experiments_original_data_probmut160_eqexp_36"
 current_dir = root +  "/expga1"
 dataset_name = "gcm"
 class_column = "class"
 train_dir = root + "/data/GCM_Training.arff"
 test_dir = root + "/data/GCM_Test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
-PROB_MUT = 16        # Probabilidad de mutacion
+PROB_MUT = 160        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
 GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
-nexperiments = 5
-num_classes = 14
-n_samples = 1400
-max_iter = 1000
+nexperiments = 20
 # params vae
 best_params = {
     'hiden1': 358,
@@ -90,7 +86,7 @@ toolbox = base.Toolbox()
 # DEFINIMOS COMO CONSTRUIR UN GEN
 # el algoritmo retiene la historia de fitnes de genes activos, contribuyendo !!!IMPORTANTE
 # a la selección de las variables que contribuyen a mejorar el fitness
-toolbox.register("attribute", bin, p=0.05)  # Nombre con el que se registra el componente
+toolbox.register("attribute", bin, p=0.1)  # Nombre con el que se registra el componente
 
 # DEFINIMOS COMO CONSTRUIR UN INDIVIDUO/CROMOSOMA
 toolbox.register(
@@ -146,175 +142,6 @@ mstats.register("avg", np.mean)
 mstats.register("std", np.std)
 mstats.register("min", np.min)
 mstats.register("max", np.max)
-
-
-# Generate synthetic data---------------------------------------------------------------------------
-# Load and process data
-print('-'*100)
-print(f'Starting data access')
-train_df, test_df, scaler, df_base, class_mapping = load_and_standardize_data_thesis(root, dataset_name, class_column)
-print(f'Data set dimensions: {df_base.shape}')
-print(f'class maping: {class_mapping}')
-cols = df_base.columns
-D_in = train_df.shape[1]
-traindata_set = DataBuilder(root, dataset_name, class_column, num_classes, train=True)
-testdata_set = DataBuilder(root, dataset_name, class_column, num_classes, train=False)
-print(f'Train data after scale and encode class: {traindata_set.data}')
-trainloader = DataLoader(dataset=traindata_set, batch_size=1024)
-testloader = DataLoader(dataset=testdata_set, batch_size=1024)
-
-# Generation phase------------------------------------------------------------------------------
-print('-'*100)
-print(f'Starting generation')
-model = CVAE(input_size= trainloader.dataset.data.shape[1],
-             labels_length=num_classes, 
-             H=best_params['hiden1'], 
-             H2=best_params['hiden2'],             
-             latent_dim=best_params['latent_dim']).float().to(device)
-model.apply(weights_init_uniform_rule)
-optimizer = optim.Adam(model.parameters(), lr=best_params['lr'])
-loss_mse = customLoss()
- # Training and validation process
-best_test_loss = float('inf')
-epochs_no_improve = 0
-patience = 50  # Number of epochs to wait for improvement before stopping
-epochs = max_iter
-for epoch in range(1, epochs + 1):
-    train(epoch, model, optimizer, loss_mse, trainloader, device)
-    test_loss = test(epoch, model, loss_mse, testloader, device)
-
-    # Check if test loss improved
-    if test_loss < best_test_loss:
-        best_test_loss = test_loss
-        epochs_no_improve = 0  # Reset counter
-    else:
-        epochs_no_improve += 1
-
-    # Early stopping check
-    if epochs_no_improve == patience:
-        print(f"Early stopping triggered at epoch {epoch}: test loss has not improved for {patience} consecutive epochs.")
-        break
-
-with torch.no_grad():
-    mus, logvars = [], []
-    for data, labels in testloader:
-        # Ensure data and labels are on the correct device
-        data = data.to(device)
-        labels = labels.to(device)
-
-        # Get the reconstructed batch, mu, and logvar from the model
-        recon_batch, mu, logvar = model(data, labels)
-        
-        mus.append(mu)
-        logvars.append(logvar)
-
-    # Concatenate all mu and logvar values
-    mu = torch.cat(mus, dim=0)
-    logvar = torch.cat(logvars, dim=0)
-
-
-# Calculate sigma: a concise way to calculate the standard deviation σ from log-variance
-sigma = torch.exp(logvar / 2)
-# Sample z from q
-q = torch.distributions.Normal(mu.mean(dim=0), sigma.mean(dim=0))
-# samples to generate
-n_samples_per_label = int(n_samples/num_classes)  # Number of samples you want to generate per label
-labels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]  
-# Initialize an empty list to hold the generated data
-generated_data = []
-
-for label in labels:
-    # Create a tensor of the specific label, repeated n_samples_per_label times
-    specific_labels = torch.ones(n_samples_per_label, dtype=torch.long) * label
-    # One-hot encode the labels
-    specific_labels_one_hot = torch.nn.functional.one_hot(specific_labels, num_classes=num_classes).float().to(device)
-    # Sample z from the distribution
-    z = q.rsample(sample_shape=torch.Size([n_samples_per_label]))
-    # Decode z to generate fake data, conditioned on the specific labels
-    with torch.no_grad():
-        pred = model.decode(z, specific_labels_one_hot).cpu().numpy()        
-        pred = scaler.inverse_transform(pred)
-        pred= np.hstack([pred, specific_labels.numpy()[:, None]])                
-        generated_data.append(pred)
-
-# Concatenate all generated data
-df_fake = np.concatenate(generated_data, axis=0)
-
-# Create a DataFrame for the fake data
-# Because the generation phase output target class as float
-# you need to convert the target class from float to integer. 
-# And when there is no 0 class, coerce 0 to 1 .
-df_fake = pd.DataFrame(df_fake, columns=cols)
-df_fake[class_column] = np.round(df_fake[class_column]).astype(int)
-class_counts = df_fake['class'].value_counts()
-print(f'class counts {class_counts}')      
-
-X = df_fake.drop(columns=[class_column])
-y = df_fake[class_column]
-X_train_fake, X_test_fake, y_train_fake, y_test_fake = train_test_split(X, y, test_size=0.3, random_state=42)
-
-# Test generation
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report, accuracy_score
-
-# Scale the data
-#scaler = StandardScaler()
-#X_train_fake_scaled = scaler.fit_transform(X_train_fake)  # Fit on training data
-#X_test_fake_scaled = scaler.transform(X_test_fake)        # Transform test data
-
-def create_mlp_model():
-    # Define your MLP model
-    model = MLPClassifier(hidden_layer_sizes=(500, 200, 100), max_iter=200, alpha=0.001,
-                          solver='adam', verbose=10, random_state=42)
-    return model
-
-# Create a pipeline with a scaler and the MLP classifier
-pipeline_fake = Pipeline([
-    ('scaler', StandardScaler()),
-    ('mlp', create_mlp_model())
-])
-
-# Train the model on the synthetic data
-pipeline_fake.fit(X_train_fake, y_train_fake)
-
-# Evaluate on the test set
-y_pred_fake = pipeline_fake.predict(Xtest)
-
-# Generate classification report
-report_fake = classification_report(y_test, y_pred_fake)
-accuracy_fake = accuracy_score(y_test, y_pred_fake)
-report_fake += "\nAccuracy: {:.4f}".format(accuracy_fake)
-
-# Print the results
-print('-'*100)
-print("Synthetic Data Generation Performance:")
-print(report_fake)
-print(accuracy_fake)
-print('-'*100)
-
-# combine sythetic data to train end original to test
-# First trial: 0.2 accuracy: Bad results 
-# Xtest = np.concatenate([Xtrain, Xtest], axis=0)
-# y_test = np.concatenate([y_train, y_test], axis=0)
-# Xtrain = np.concatenate([X_train_fake, X_test_fake ], axis=0)
-# y_train = np.concatenate([y_train_fake, y_test_fake], axis=0)
-
-# Second trial
-# combine sythetic and original data to train, big dataset, and original to test
-Xtrain = np.concatenate([Xtrain, X_train_fake, X_test_fake ], axis=0)
-y_train = np.concatenate([y_train, y_train_fake, y_test_fake], axis=0)
-# Test on original data
-
-
-print(f'X_train shape: {Xtrain.shape}')
-print(f'X_test shape: {Xtest.shape}')
-print(f'y_train shape: {y_train.shape}')
-print(f'y_test shape: {y_test.shape}')
-
-
 
 for nexperiment in range(0, nexperiments):    
 
@@ -456,7 +283,7 @@ for nexperiment in range(0, nexperiments):
     print(f'selected_features {len(selected_features)}')
 
     # Define your JSON file path
-    json_file_path = current_dir + '/experiments2.json'
+    json_file_path = current_dir + '/experiments.json'
     # Check if the file exists and read its content; if not, initialize an empty dictionary
     if os.path.exists(json_file_path):
         with open(json_file_path, 'r') as file:
