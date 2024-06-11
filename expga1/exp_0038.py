@@ -27,15 +27,15 @@ from src.bo_vae2 import *
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # params
-experiment_name = "gcm_base_0037"
-description = "experiments_original_data_probmut160_eqexp_36"
+experiment_name = "gcm_base_0038"
+description = "experiments_original_data_probmut16_eqexp_35"
 current_dir = root +  "/expga1"
 dataset_name = "gcm"
 class_column = "class"
 train_dir = root + "/data/GCM_Training.arff"
 test_dir = root + "/data/GCM_Test.arff"
 POP_SIZE = 100          # Cantidad de individuos en la población
-PROB_MUT = 160        # Probabilidad de mutacion
+PROB_MUT = 16        # Probabilidad de mutacion
 PX = 0.75               # Probabilidad de cruza
 GMAX = 30               # Cantidad máxima de generaciones que se ejecutará el algoritmo
 top_features_totrack = 200 
