@@ -283,7 +283,7 @@ for nexperiment in range(0, nexperiments):
     print(f'selected_features {len(selected_features)}')
 
     # Define your JSON file path
-    json_file_path = current_dir + '/experiments.json'
+    json_file_path = current_dir + '/experiments2.json'
     # Check if the file exists and read its content; if not, initialize an empty dictionary
     if os.path.exists(json_file_path):
         with open(json_file_path, 'r') as file:
