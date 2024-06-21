@@ -38,31 +38,43 @@ gcm = categorize_experiments(data, gcm_original_data, 'gcm', 13)
 custom_palette = {'original': 'gray', 'augmented': 'pink'}
 
 # Generate the plot
-plt.figure(figsize=(14, 10))
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
 # Leukemia plot
-plt.subplot(2, 2, 1)
-sns.boxplot(x='group', y='pob_accuracy_avg', data=leukemia, palette=custom_palette)
-sns.stripplot(x='group', y='pob_accuracy_avg', data=leukemia, color='grey', dodge=True)
-plt.title('Leukemia Accuracy Average by Group')
+sns.boxplot(ax=axes[0, 0], x='group', y='pob_accuracy_avg', data=leukemia, palette=custom_palette)
+sns.stripplot(ax=axes[0, 0], x='group', y='pob_accuracy_avg', data=leukemia, color='darkgrey', dodge=True)
+axes[0, 0].set_xlabel('')
+axes[0, 0].set_title('Leukemia')
 
 # Gisette plot
-plt.subplot(2, 2, 2)
-sns.boxplot(x='group', y='pob_accuracy_avg', data=gisette, palette=custom_palette)
-sns.stripplot(x='group', y='pob_accuracy_avg', data=gisette, color='grey', dodge=True)
-plt.title('Gisette Accuracy Average by Group')
+sns.boxplot(ax=axes[0, 1], x='group', y='pob_accuracy_avg', data=gisette, palette=custom_palette)
+sns.stripplot(ax=axes[0, 1], x='group', y='pob_accuracy_avg', data=gisette, color='darkgrey', dodge=True)
+axes[0, 1].set_xlabel('')
+axes[0, 1].set_title('Gisette')
 
 # Madelon plot
-plt.subplot(2, 2, 3)
-sns.boxplot(x='group', y='pob_accuracy_avg', data=madelon, palette=custom_palette)
-sns.stripplot(x='group', y='pob_accuracy_avg', data=madelon, color='grey', dodge=True)
-plt.title('Madelon Accuracy Average by Group')
+sns.boxplot(ax=axes[1, 0], x='group', y='pob_accuracy_avg', data=madelon, palette=custom_palette)
+sns.stripplot(ax=axes[1, 0], x='group', y='pob_accuracy_avg', data=madelon, color='darkgrey', dodge=True)
+# do not show x axis name 'group'
+axes[1, 0].set_xlabel('')
+axes[1, 0].set_title('Madelon')
 
-# GCM plot
-plt.subplot(2, 2, 4)
-sns.boxplot(x='group', y='pob_accuracy_avg', data=gcm, palette=custom_palette)
-sns.stripplot(x='group', y='pob_accuracy_avg', data=gcm, color='grey', dodge=True)
-plt.title('GCM Accuracy Average by Group')
+# GCM plot with different background
+ax4 = axes[1, 1]
+ax4.set_facecolor('#f0f0f0')  # Subtle background color for GCM
+sns.boxplot(ax=ax4, x='group', y='pob_accuracy_avg', data=gcm, palette=custom_palette)
+sns.stripplot(ax=ax4, x='group', y='pob_accuracy_avg', data=gcm, color='darkgrey', dodge=True)
+axes[1, 1].set_xlabel('')
+ax4.set_title('GCM')
 
+# Add legend for binary vs multiclass
+fig.legend(['Binary (Leukemia, Gisette, Madelon)', 'Multiclass (GCM)'], loc='upper center', ncol=2, frameon=False)
+
+# Add shared labels
+#fig.text(0.5, 0.04, 'Group', ha='center', va='center')
+#fig.text(0.06, 0.5, 'Pob Accuracy Avg', ha='center', va='center', rotation='vertical')
+
+plt.suptitle('Accuracy Comparison of Original vs Augmented Data Across Datasets', y=1.02)
 plt.tight_layout()
+plt.savefig('expga1/boxplot_results.png')
 plt.show()
