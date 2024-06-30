@@ -123,9 +123,7 @@ def load_and_preprocess_gcm_data(train_dir, test_dir, class_column=None):
     
     return X_train_scaled, y_train, X_test_scaled, y_test, features, class_mapping
 
-
-
-
+# https://chatgpt.com/share/89477c70-ce0d-4d49-ab7c-3a3408f4a99f
 
 # Funciones
 # =================================
