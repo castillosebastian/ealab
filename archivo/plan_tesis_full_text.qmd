@@ -1,0 +1,251 @@
+---
+title: "UTN Regional Paraná - Maestría en Minería de Datos"
+subtitle: "Plan de Tesis"
+date: "Octubre 2023"
+format:
+  pdf:
+    code-fold: false    
+jupyter: python3
+bibliography: references.bib
+---
+
+## Directores: Dr. Matías Gerard y Dr. Leandro Vignolo (CONICET-UNL)
+
+### Título: "Aumentación de datos mediante autoencoders variacionales y su impacto en estrategias de selección de características basadas en algoritmos genéticos."
+
+### **Alumno: Lic. Claudio Sebastián Castillo (UTN)**
+
+\pagebreak
+
+## Fundamentación y Justificación del tema
+
+Los algoritmos genéticos (en adelante AG) son métodos de optimización inspirados en la evolución natural, diseñados para encontrar soluciones en espacios de búsqueda complejos [@vignoloEvolutionaryLocalImprovement2017]. A diferencia de los métodos de optimización exhaustivos (ej. métodos enumerativos[^1]), los AG son particularmente efectivos en espacios de búsqueda discretos, ruidosos, cuando la función objetivo no puede describirse mediante una ecuación o la misma no es diferenciable [@goldbergdavide.GeneticAlgorithmsSearch1989]. Utilizando principios basados en la evolución, estos algoritmos generan iterativamente soluciones a partir de una población de candidatos, de manera similar a cómo la evolución natural optimiza características biológicas a lo largo de generaciones en función de las condiciones del entorno. En contextos de aplicación sus resultados regularmente conducen a soluciones cercanas al óptimo, capaces de mantener un buen compromiso en la satisfacción de múltiples requerimientos [@jiaoSurveyEvolutionaryMultiobjective2023]. Por eso, los AG son eficaces para atacar tanto problemas de objetivo único, como problemas multiobjetivo.
+
+[^1]: @goldbergdavide.GeneticAlgorithmsSearch1989, p.4.
+
+La robustez de los AG está determinada, como bien sostiene Goldberg [-@goldbergdavide.GeneticAlgorithmsSearch1989], por una serie de características distintivas, que fortalecen su configuración de búsqueda, a saber: a) operan sobre un espacio *codificado* del problema y no sobre el espacio en su representación original; b) realizan la exploración evaluando una *población de soluciones* y no soluciones individuales; c) tienen como guía una *función objetivo* (también llamada *función de aptitud*) que no requiere derivación u otras funciones de cálculo; y d) suponen *métodos probabilísticos de transición* (operadores estocásticos) y no reglas determinísticas. Estas características permiten a los AG superar restricciones que tienen otros métodos de optimización, condicionados -por ejemplo- a espacios de búsqueda continuos, diferenciables o unimodales. Por ello, su aplicación se ha difundido notablemente, trascendiendo los problemas clásicos de optimización, aplicándose en distintas tareas [@vieQualitiesChallengesFuture2021] y a lo largo de diversas industrias [@jiaoSurveyEvolutionaryMultiobjective2023].
+
+La importancia de los AGs como herramientas de optimización, adquiere especial preeminencia en el problema de *selección de características* [@jiaoSurveyEvolutionaryMultiobjective2023], por lo que en este trabajo dirigiremos la atención en esa dirección*.* La *selección de características* (en adelante SC) representa un desafío de optimización combinatoria complejo, que despierta interés en el universo del aprendizaje automático debido a su impacto en el rendimiento de los modelos y la posibilidad de reducir la complejidad computacional de ciertos problemas. Tal desafío está determinado por varios factores. En primer lugar encontramos que, en espacios de alta dimensionalidad, la cardinalidad del conjunto de soluciones candidatas crece de manera exponencial, y los problemas se vuelven computacionalmente intratables debido a la extensión del espacio de búsqueda.[^2] En segundo lugar, junto con la alta dimensionalidad, aparece el problema de las interacciones entre características. Aquí, el prolífico espectro de dependencias que pueden establecer los atributos plantea normalmente vínculos difíciles de modelar atento a que se multiplican de la mano de la dimensionalidad.[^3] Por último, aunque no por ello menos importante, aparece el carácter multiobjetivo de los problema de SC, donde no solo interesa maximizar la eficacia de los modelos sino también que sean eficientes. Eficiencia que implica -generalmente- la necesidad de minimizar la cantidad de atributos seleccionados para resolver un problema [@jiaoSurveyEvolutionaryMultiobjective2023].
+
+[^2]: Cabe destacar que para un conjunto de `n` características es posible determinar un total de `n2` posibles soluciones, espacio que constituye un dominio de búsqueda difícil de cubrir aún con `n` conservadores. Por ejemplo para un conjunto de 20 características (atributos) el número total de subconjuntos a evaluar supera el millón de posibles candidatos, específicamente: 1.048.576.
+
+[^3]: Por ejemplo, dos características con alto valor discriminatorio para resolver un problema de clasificación pueden ser redundantes debido a su correlación y exigir criterios inteligentes de inclusión-exclusión. A la inversa, características que individualmente consideradas pueden carecer de valor discriminatorio, debido a su complementariedad pueden ser esenciales para resolver un problema y por lo tanto exigir criterios complejos de evaluación y búsqueda.
+
+Estos desafíos son abordados por los AGs de manera conveniente y creativa.[^4] En el marco de este algoritmo cada individuo (muestra) representa una solución candidata, con un perfil genético particular determinado por un subconjunto de características. La búsqueda de las mejores soluciones comienza con la selección de una población inicial de individuos y un subconjunto de características generados aleatoriamente. Este subconjunto se evalúa utilizando una función de aptitud, y los individuos con mejor rendimiento (puntaje) son seleccionados para la reproducción. Este proceso continúa durante un cierto número de generaciones hasta que se cumple una condición de terminación [@goldbergdavide.GeneticAlgorithmsSearch1989].
+
+[^4]: Ciertamente, no son sus atributos aislados los que le dan esa posibilidad, sino la interacción de sus componentes.
+
+Este mecanismo simple constituye un eficaz método de selección en contextos de alta dimensionalidad y bajo número de muestras. Esa eficacia se debe a la capacidad de explorar el problema dividiéndolo en subespacios de características y, al mismo tiempo, explotar las regiones de mayor valor en cada subespacio [@goldbergdavide.GeneticAlgorithmsSearch1989].[^5]
+
+[^5]: Ambas funciones -exploración y explotación- permiten al algoritmo reconfigurar el espacio de búsqueda y poner a prueba sus complejas dependencias. Como vimos, el procedimiento es orientado por una función de aptitud que evalúa las distintas posibilidades combinatorias encontradas por el algoritmo y retroalimenta el proceso exploratorio. La dinámica completa tiene como resultado un procedimiento experimental de búsqueda y selección capaz de reconocer soluciones próximas al óptimo.
+
+Dicho lo anterior, no es menos cierto que la capacidad de selección de los AGs depende de la evaluación de aptitud que orienta la búsqueda de las mejores soluciones, y tal evaluación descansa -finalmente- en la disponibilidad de datos. En efecto, la existencia y número de individuos condiciona la función objetivo y por esa vía también al proceso de selección de características de los AGs. La disponibilidad de datos resulta así un factor clave para la selección. Este requerimiento, vinculado particularmente a la función objetivo, se presenta no solo cuando se utiliza como evaluador a modelos complejo de aprendizaje automático (que demandan una cantidad creciente de muestras de entrenamiento)[^6], sino también cuando se trabaja sobre datos cuyas clases se encuentran desbalanceadas [@fajardoOversamplingImbalancedData2021; @blagusSMOTEHighdimensionalClassimbalanced2013]. En ambos escenarios, la falta de información suficiente degrada la capacidad informativa de la función objetivo [@hastieElementStatisticalLearning2009], afectando gravemente el proceso de selección de características.
+
+[^6]: @alzubaidiSurveyDeepLearning2023.
+
+En esa línea, el problema de la disponibilidad de datos en los proyecto de selección de características -sea dentro o fuera del campo de los AGs-, ha encontrado en las estrategias de aumentación una posible solución [@gmComprehensiveSurveyAnalysis2020]. Entre esas estrategias, los Autoencoders Variacionales (en adelante AV) han adquirido popularidad, superando a métodos tradicionales (ej. sobremuestreo [@blagusSMOTEHighdimensionalClassimbalanced2013]) y -en ciertos casos- también a otro modelos generativos basados de redes neuronales profundas [@fajardoOversamplingImbalancedData2021].
+
+Los AVs constituyen modelos generativos[^7] capaces de aprender una representación latente de datos observados y producir nuevas muestras con las mismas características fundamentales[^8] que las observaciones [@kingmaIntroductionVariationalAutoencoders2019]. Esa capacidad resulta particularmente efectiva por el hecho de que prescinde de fuertes supuestos estadísticos a los que adscriben otros modelos generativos y también por su escalabilidad.[^9] Hoy los AVs son ampliamente utilizados en biología molecular, química, procesamiento de lenguaje natural, astronomía, entre otros [@ramchandranLearningConditionalVariational2022].
+
+[^7]: Redes neuronales profundas con arquitectura *encoder-decoder* [@kingmaIntroductionVariationalAutoencoders2019]. Estos modelos pueden presentar distintas configuraciones según el problema tratado y el objetivo particular de la implementación [@wuEVAEEvolutionaryVariational2023].
+
+[^8]: Similar distribución conjunta de probabilidad.
+
+[^9]: El modelo emplea *retropropagación* como estrategia de optimización [@kingmaIntroductionVariationalAutoencoders2019]
+
+Por todo lo visto hasta aquí advertimos que la posibilidad de expandir el conjunto de datos mediante el uso de AVs abre nuevas alternativas para afrontar el problema de la selección de características aplicando AGs. Estas alternativas no solo parecen prometedoras como estrategias orientadas a la multiplicación de muestras de entrenamiento para mejorar el desempeño de la función objetivo, sino también como partes funcionales de sus operadores de variación.[^10] De este modo, la integración de ambas tecnologías ofrece un enfoque provechoso para abordar el problema de selección de características en distintos escenarios que enfrentan los AGs.
+
+[^10]: Así, la integración de los AVs en el contexto de los AGs podría dirigirse no solo a la multiplicación general de datos, sino también a la multiplicación selectiva de ciertos subconjuntos de características valiosas
+
+A la fecha de publicación del presente trabajo no hemos encontrado experiencias de aplicación de AVs en el ámbito de selección de características mediante AGs. En la medida que esto sea así creemos que nuestro aporte a la comunidad de investigadores y practicantes de la disciplina estará en proveer información y experimentación sobre la combinación de ambos algoritmos. Dicho aporte tendría un alcance nacional a todos aquellos equipos dedicados al problema de selección de características aplicando computación evolutiva.
+
+## Estado del arte
+
+La aplicación de AVs como técnica de aumentación de datos en el contexto de distintos problemas de aprendizaje automático es extendida fuera del campo de los AGs. Se aplica al tratamiento de imágenes [@fajardoOversamplingImbalancedData2021; @aiGenerativeOversamplingImbalanced2023; @khmaissiaConfidenceGuidedDataAugmentation2023; @kwarciakDeepGenerativeNetworks2023], texto [@zhangImproveDiverseText2019] , habla [@blaauwModelingTransformingSpeech2016; @latifVariationalAutoencodersLearning2020] y música [@robertsHierarchicalLatentVector2019], y distintos formatos de datos: tabulares [@leelarathnaEnhancingRepresentationLearning2023], longitudinales [@ramchandranLearningConditionalVariational2022] y grafos [@liuConstrainedGraphVariational2018]. En lo que sigue repasaremos las experiencias más afines a nuestro enfoque sobre el impacto de la aumentación en el aprendizaje y la selección de características.
+
+En @fajardoOversamplingImbalancedData2021 se investiga si los AVs y las redes generativas antagónicas (GAN) pueden aumentar datos desbalanceados via sobremuestreo de las clases minoritarias, y mejorar así el rendimiento de un clasificador. Para ello se crean versionanes desbalanceadas de reconocidos datos multiclases MNIST [@lecunGradientBasedLearningApplied1998] y Fashion MNIST [@xiaoFashionMNISTNovelImage2017], a los cuales, posteriormente, se los re-balancea agregándoles muestras sintéticas generadas por un AV condicionado por clase (AV Condicional). Para la tarea de clasificación se emplea un Perceptrón Multicapa (MLP), y se evalúa su desempeño promediando métricas de precisión, exhaustividad y F1 sobre distintos experimentos. La evaluación incluye la comparación de resultados del clasificador con datos aumentados por sobremuestreo aleatorio, mediante SMOTE [@blagusSMOTEHighdimensionalClassimbalanced2013], GAN y AVs. El resultado muestra a los AVs -en su versión condicional- como el mejor modelo generativo para resolver el problema de datos desbalanceados mediante sobremuestreo de las clases minoritarias. 
+
+@aiGenerativeOversamplingImbalanced2023 vuelve sobre los problemas planteados en @fajardoOversamplingImbalancedData2021, proponiento una nueva metodología que superaría sus resultados. La propuesta en esta oportunidad plantea la aumentación de datos de la clase minoritaria condicionada a las características de la distribución que tienen los datos de la clase mayoritaria. El método se llama AV-Guiado-por-la-Mayoría (*Majority-Guided VAE* o MGVAE) y procura incorporar en la generación no solo información intraclase sino también interclases, con el fin de propagar la diversidad y riqueza de la mayoría en la minoría, y mitigar así riesgos de sobreajuste en los modelos. Este modelo se preentrena utilizando muestras de la clase mayoritaria, y luego se ajusta con datos de la clase minoritaria aplicando la regularización EWC [@kirkpatrickOvercomingCatastrophicForgetting2017] para retener el aprendizaje de la etapa previa. Para evaluar la eficacia de MGVAE, se realizaron experimentos en varios conjuntos de datos de imágenes y tabulares, utilizando diversas métricas de evaluación como Precisión Balanceada (B-ACC), Precisión Específica Promedio por Clase (ACSA) y Media Geométrica (GM). Los resultados muestran que MGVAE supera a otros métodos de sobremuestreo en tareas de clasificación.
+
+Un problema diferente es tratado en @khmaissiaConfidenceGuidedDataAugmentation2023 donde se emplean AVs para aumentar datos en una tarea de clasificación con enfoque semi-supervisado. Aquí el desafío no pasa por el desbalance entre clases, sino en la búsqueda de mejorar el clasificador en regiones del espacio de características con bajo desempeño (ratios de error altos). Para eso, se mapea el espacio de características entrenando un modelo de WideResNet [@zagoruykoWideResidualNetworks2017] y luego se seleccionan las muestras mal clasificadas o con bajo nivel de confianza en la clasificación. Estas muestras se utilizan para entrenar un AV y generar datos sintéticos. Finalmente, las imágenes sintéticas se usan junto con las imágenes originales etiquetadas para entrenar un nuevo modelo de manera semi-supervisada. Se evalúan los resultados sobre STL10 y CIFAR-100 obteniendo mejoras en la clasificación de imágenes en comparación con los enfoques supervisados.
+
+Finalmente, antecedente interesante es el presentado por @martinsVariationalAutoencodersEvolutionary2022b pues pese a no estar directamente vinculado a la aumentación de datos, incluye la generación sintética de muestras mediante AV y la selección de características por AG. En efecto, el artículo propone la generación de individuos y optimización de características orientados al diseño de proteínas (específicamente variantes de Luciferasa bacteriana *luxA*). Partiendo de muestras de ADN de proteinas obtenidas de un subconjunto de datos de la base InterPro (identificados bajo el código "IPR011251") se generan conjuntos de individuos combinando datos originales, datos muestreados de la capa latente -*encoder*- del AV (configurado como MSA-AV para procesar sequencias alineadas de ADN) y datos optimizados por aplicación del AG. En el caso del algoritmo genético se emplean dos tipos de optimización: de objetivo único y multiobjetivos, con funciones asociadas a la búsqueda de propiedades deseables en las muestras de ADN (solubilidad, síntesis, estabilidad y agregación de proteínas). El resultado de los experimentos realizados muestra que el diseño de proteínas guiado por la optimización mediante AG resultó en mejores soluciones que las obtenidas mediante muestreo directo, y que por su parte la optimización multiobjetivos permitió la selección de proteínas con el mejor conjunto de propiedades.
+
+Los casos mencionados en el apartado nos ofrecen un conjunto de experiencias significativas a considerar al momento de resolver el problema planteado en este trabajo. Otras experiencias, como por ejemplo la configuración evolutiva de un AV [@wuEVAEEvolutionaryVariational2023], el ensamble de AVs [@leelarathnaEnhancingRepresentationLearning2023], por mencionar algunas novedosas, escapan al recorte que hemos fijado. 
+
+
+## Definición del problema
+
+La disponibilidad de datos muestrales afecta el proceso de selección de características aplicando AGs debido a su impacto en la función objetivo. Este impacto es particularmente negativo en escenarios de alta dimensionalidad y bajo número de muestras. Por eso, la técnica de aumentación de datos mediante AVs plantea una posible solución a este problema, ofreciendo distintas alternativas de implementación en el contexto de los AGs.
+
+## Objetivos
+
+**General**:
+
+Evaluar el impacto de la aumentación de datos mediante autoencoders variacionales sobre el desempeño de estrategias de selección de características basados en algoritmos genéticos.
+
+**Específicos**:
+
+1.  Implemetar un algoritmo genético para selección de características.
+
+2.  Integrar estrategias de aumentación de datos basadas en AVs en los AGs.
+
+3.  Evaluar el desempeño de las estrategias propuestas empleando conjuntos de datos de diferente complejidad.
+
+4.  Comparar el desempeño de AGs con datos aumentados mediante las estrategias desarrolladas frente a implementaciones sin aumentación.
+
+## Metodologías
+
+Para cumplir los objetivos propuestos compararemos el desempeño de un algoritmo genético *clásico* frente a uno que incorpore las estrategias de aumentación que se desarrollen. Por un lado implementaremos un algoritmo genético *clásico* aplicado a conjuntos de datos conocidos dentro de la comunidad científica y en condiciones regulares de procesamiento para la selección de características en problemas de aprendizaje automático. Por el otro, aplicaremos a los mismos conjuntos un variante *novedosa* de algoritmo genético, integrando un módulo de aumentación de datos a partir de la intervención de AVs. Para evaluar esta variante de algoritmo genético realizaremos diversos experimentos con ajustes en el diseño de la arquitectura que consistirán en la integración del módulo de aumentación de datos en dos puntos: 1) previo al inicio del proceso evolutivo y 2) durante el proceso evolutivo del algoritmo genético. Para la comparación de ambas implementaciones elegiremos distintas métricas de eficacia en la clasificación, teniendo en cuenta en los resultados el tamaño final de características seleccionadas.
+
+A continuación detallamos los aspectos técnicos vinculados a los elementos mencionados, a saber: algoritmos, datos, arquitecturas y métricas para la evaluación.
+
+### Algoritmos
+
+Para el presente trabajo usaremos algoritmos genéticos (AGs) como método de búsqueda[^11] debido a la posibilidad que brindan de emplear codificación binaria y permitir así una representación intuitiva del espacio de características [@vignoloEvolutionaryLocalImprovement2017]. Para aumentación de datos utilizaremos *autoencoders variacionales* (AVs) como instancia generativa [@kingmaIntroductionVariationalAutoencoders2019].
+
+[^11]: Otros métodos robustos, como por ejemplo el *enjambre de partículas* (PSO) y *optimización de colonia de hormigas* (ACO), típicamente utilizan codificación basada en números reales por lo que constituyen opciones menos adecuadas al problema que enfrentaremos en este trabajo.
+
+Los AGs constituyen una de las herramientas más estudiadas e implementadas dentro de los métodos evolutivos [@goldbergdavide.GeneticAlgorithmsSearch1989, @kramerGeneticAlgorithmEssentials2017], dada su capacidad para encontrar soluciones en espacios de búsqueda complejos [@vignoloEvolutionaryLocalImprovement2017]. El procedimiento de búsqueda de los AGs opera evolucionando una población de individuos que consisten en cromosomas que codifican el espacio de soluciones. Dicha evolución -al igual que la evolución natural- sucede a través de operadores (funciones) de selección, variación (mutación y cruce) y reemplazo que transforman el material genético disponible: los individuos más aptos sobreviven y se reproducen, mientras que los menos aptos desaparecen[^12]. Esta aptitud -que imita la presión selectiva de un entorno natural- se evalúa mediante la aplicación de una función objetivo (específica del problema) a cada individuo a partir de la información decodificada de sus cromosomas. Dicha función objetivo puede asumir múltiples formas [@jiaoSurveyEvolutionaryMultiobjective2023], pero en nuestro trabajo nos centraremos en el uso de modelos de aprendizaje automático, particularmente Maquinas de Soporte Vectorial [@boserTrainingAlgorithmOptimal1992] y Bosques Aleatorios [@breimanRandomForests2001]. Este método heurístico de búsqueda tendrá en nuestro trabajo dos configuraciones: una *clásica* sin aumentación de datos y una *novedosa* con aumentación de datos aplicando *autoencoders variacionales* (AV)*.*
+
+[^12]: Como su nombre lo indica el operador de selección determina la elegibilidad de un individuo para sobrevivir y reproducirse en función de su aptitud para resolver un problema. En el contexto de los AGs esta aptitud no es otra cosa que el puntaje que obtiene un individuo evaluado en una función objetivo. Por su parte los operadores de variación tienen como función combinar la información genética de individuos (cruce) y alterar aleatoriamente sus cromosomas (mutación), promoviendo transformaciones en el material genético global con sesgo hacia mejorar la aptitud poblacional para resolver un problema. La variación equivale a la búsqueda natural por mejorar las adaptaciones de los individuos a su entorno. Finalmente el operador de reemplazo mantiene la población constante, sustituyendo individuos poco aptos por aquellos de mayor aptitud. Estos operadores se combinan en ciclos iterativos que se repiten hasta satisfacer un criterio de terminación deseado (por ejemplo, un número predefinido de generaciones o un valor de aptitud) [@vignoloEvolutionaryLocalImprovement2017].
+
+Para aumentar el conjunto de datos que empleará la función de aptitud de los AGs emplearemos *autoencoders variacionales* (AVs). Los AVs son modelos generativos implementados por redes neuronales profundas con arquitectura *encoder-decoder* capaces de aprender una representación latente de datos disponibles y generar nuevas muestras de similares características a los datos originales [@kingmaIntroductionVariationalAutoencoders2019]. Estos modelos se basan en el supuesto de que cualquier dato disponible, por ejemplo $x$, se genera mediante un proceso aleatorio que involucra una variable latente $z$. Bajo ese supuesto, el modelo procede tomando como muestra una observación de $z$ de la distribución de probabilidad *a priori* $p_\theta(z)$, que luego se utiliza para tomar una observación de $x$ de la distribución condicional $p_\theta(x|z)$. El objetivo del modelo es obtener *estimaciones de máxima verosimilitud* del parámetro $\theta$ en situaciones donde tanto la verosimilitud marginal $p_\theta(x) = \int p_\theta(z)p_\theta(x|z) dz$ como la probabilidad *a posteriori* $p_\theta(x|z)$ son intratables[^13]. Para eso, utiliza la distribución $q_\phi(z|x)$ como una aproximación al intratable $p_\theta(x|z)$, maximizando el *límite inferior variacional*[^14] para $p_\theta(x)$. El objetivo de aprendizaje del AV se da entonces por:
+
+[^13]: Son intratables porque $z$ es una variable latente, no observada, y el cómputo de probabilidad que la incluya -en este caso $x$ - debe *marginalizar* (integrar) todo sus posibles valores, situación computacionalmente costosa en el contexto del modelos analizado.
+
+[^14]: Limite obtenido a través de una función auxiliar conocida como función *ELBO.*
+
+> $\mathcal{L}_{AV}(x; \theta, \phi) = \max(\phi,\theta) \left( E_{z \sim q_\phi(z|x)} [\log p_\theta (x|z)] - \text{KL}(q_\phi(z|x) \| p_\theta (z)) \right),$
+
+donde $\text{KL}(q(\cdot) \| p(\cdot))$ denota la divergencia de Kullback--Liebler entre dos distribuciones $q(\cdot)$ y $p(\cdot)$. Una vez que el AV está entrenado, una observación sintética $x'$ se genera tomando primero $z \sim p_\theta(z)$ y posteriormente tomando $x'$ de la probabilística condicional entrenada por el modelo $p_\theta(x|z)$.
+
+### **Conjuntos de Datos**
+
+Se llevarán a cabo experimentos utilizando distintos conjuntos de datos con alta dimensionalidad y diferente número de características, incluyendo diversos números de clases. En principio proponemos los siguientes datos:
+
+1.  *Madelon*: Este es un conjunto de datos artificial con 500 características, donde el objetivo es un XOR multidimensional con cinco características relevantes. Fue creado para el desafío de Selección de Características NIPS 2003[^15], y está disponible en el Repositorio UCI[^16]. De las 495 características restantes, 15 corresponden a combinaciones lineales de las cinco relevantes, y las otras 480 son características de ruido. Madelon es un problema de clasificación de dos clases con variables de entrada binarias dispersas. Las dos clases están equilibradas, y los datos se dividen en conjuntos de entrenamiento y prueba.
+2.  *Leukemia*: El análisis de datos de expresión génica obtenidos de micro-datos de ADN se estudia en Golub [-@golubMolecularClassificationCancer1999] para la clasificación de tipos de cáncer. Construyeron un conjunto de datos con 7129 mediciones de expresión génica en las clases ALL (leucemia linfocítica aguda) y AML (leucemia mielogénica aguda). El problema es distinguir entre estas dos variantes de leucemia (ALL y AML). Los datos se dividen originalmente en dos subconjuntos: un conjunto de entrenamiento y un conjunto de prueba independiente. El conjunto de entrenamiento consta de 38 muestras (27 ALL y 11 AML) de especímenes de médula ósea. El conjunto de prueba tiene 34 muestras (20 ALL y 14 AML), preparadas bajo diferentes condiciones experimentales e incluyendo 24 especímenes de médula ósea y 10 muestras de sangre.
+3.  *GCM*: El conjunto de datos GCM fue compilado en Ramaswamy [-@ramaswamyMulticlassCancerDiagnosis2001] y contiene los perfiles de expresión de 198 muestras de tumores que representan 14 clases comunes de cáncer humano3. Aquí el enfoque estuvo en 190 muestras de tumores después de excluir 8 muestras de metástasis, y el preprocesamiento se realizó de acuerdo con \[24\]. Finalmente, cada matriz se estandarizó a una media de 0 y una varianza de 1 según \[25\]. El conjunto de datos consta de un total de 190 instancias, con 16063 atributos (biomarcadores) cada una, y distribuidos en 14 clases desequilibradas. En nuestros experimentos, los datos se separaron en tres conjuntos: entrenamiento (72 muestras), validación (72 muestras) y prueba (42 muestras). Con el objetivo de equilibrar las clases en el conjunto de entrenamiento y prevenir el sobreajuste del clasificador debido a la clase mayoritaria, las muestras se repitieron para obtener el mismo número para cada clase. Al final, se utilizaron un total de 168 muestras para el entrenamiento. Por el contrario, los conjuntos de validación y prueba están estratificados, manteniendo el desequilibrio de clases.
+4.  *Gisette:* es un dataset creado para trabajar el problema de reconocimiento de dígitos escritos a mano [@isabelleguyonGisette2004]. Este conjunto de datos forma parte de los cinco conjuntos utilizados en el desafío de selección de características de NIPS 2003. Tiene 13500 observaciones y 5000 atributos. El desafío radica en diferenciar los dígitos '4' y '9', que suelen ser fácilmente confundibles entre sí. Los dígitos han sido normalizados en tamaño y centrados en una imagen fija de 28x28 píxeles. Para el desafío de selección de características, se modificaron los datos originales. Específicamente, se muestrearon píxeles al azar en la parte superior central de la característica que contiene la información necesaria para diferenciar el 4 del 9. Además, se crearon características de orden superior como productos de estos píxeles para sumergir el problema en un espacio de características de mayor dimensión. También se añadieron características distractoras denominadas "sondas", que no tienen poder predictivo. El orden de las características y patrones fue aleatorizado.
+
+[^15]: <http://clopinet.com/isabelle/Projects/NIPS2003/>
+
+[^16]: <http://archive.ics.uci.edu/ml/datasets.html>
+
+Dejamos planteada la posibilidad de introducir nuevos conjuntos de datos en función de los resultados obtenidos y la necesidad de profundizar nuestros experimentos.
+
+### **Arquitecturas**
+
+Para nuestro trabajo utilizaremos dos configuraciones para nuestro AG: una *clásica* integrada por un AG, cuya función objetivo estará conformada por un modelo de Bosques Aleatorios sin aumentación de datos y una *novedosa* con una estructura análogo de algoritmos pero con la intoducción de un módulo de aumentación de datos aplicando *autoencoders variacionales* (AV). A su vez, dentro de esta segunda configuración ensayaremos ajustes en el diseño que consistirán en la integración del módulo de aumentación de datos en dos puntos: 1) previo al inicio del proceso evolutivo y 2) durante el proceso evolutivo. De esta forma buscamos evaluar el aporte generativo del modelo AV en distintas etapas del AG.
+
+### **Métricas de evaluación**
+
+Para la comparación de ambas implementaciones elegiremos como métricas UAR, F1 y el coeficiente de correlación de Matthews (MCC), todos ellas en relación al tamaño final de características seleccionadas por cada modelo. Generalmente los AGs constituye modelos *multiobjetivo* donde no solo interesa optimizar una métrica particular vinculada a su eficacia -por ejemplo precisión en su clasificación de individuos- sino también interesa satisfacer requerimientos de eficiencia -como por ejemplo minimizar el conjunto de características con que opera el modelo- [@jiaoSurveyEvolutionaryMultiobjective2023]. Por esta razón nuestra evaluación tomará en cuenta ambas dimensiones en el desempeño de las soluciones propuestas.
+
+## Condiciones para el desarrollo
+
+En el aspecto técnico, el proyecto se dividirá en dos fases en cuanto a la infraestructura. La primera fase será la del desarrollo y depuración de código, que se llevará a cabo en una laptop personal. Este equipo cuenta con 12 GB de memoria RAM y un procesador Intel Core i7 de 4 núcleos, lo cual es suficiente para programar, probar algoritmos y analizar datos a pequeña escala. Sin embargo, debido a la complejidad y el volumen de los datos que se manejarán, esta configuración local podría resultar insuficiente para los experimentos a gran escala. Por lo tanto, la segunda fase de experimentación se realizará en la nube, utilizando Google Cloud Compute (GCC). Estas máquinas en la nube nos permitirá configurar recursos en torno a 30 GB de memoria RAM y 12 núcleos de CPU, posibilitando así manejar grandes volúmenes de datos y realizar cálculos complejos de manera más eficiente. Este enfoque dual asegura un desarrollo ágil a la vez que permite experimentos computacionalmente intensivos.
+
+Respecto a software el proyecto empleará Python 3.9. A continuación se detallan las librerías de Python que serán utilizadas para el desarrollo, los conjuntos de datos en los que se llevarán a cabo los experimentos y las arquitecturas computacionales que se explorarán en el estudio. Este detalle no es excluyente, pudiendo ampliarse en pos del cumplimiento de los objetivos propuestos.
+
+### Librerías de Python
+
+-   `numpy`: Para manipulación de matrices y cálculos matemáticos.
+    -   Repositorio: [GitHub - numpy](https://github.com/numpy/numpy)
+-   `pandas`: Para manejo de conjuntos de datos.
+    -   Repositorio: [GitHub - pandas](https://github.com/pandas-dev/pandas)
+-   `scikit-learn`: Para algoritmos de aprendizaje automático y preprocesamiento de datos.
+    -   Repositorio: [GitHub - scikit-learn](https://github.com/scikit-learn/scikit-learn)
+-   `lightgbm`: Para implementar el modelo de Bosques Aleatorios.
+    -   Repositorio: [GitHub - LightGBM](https://github.com/microsoft/LightGBM)
+-   `DEAP`: Para implementar algoritmos genéticos.
+    -   Repositorio: [GitHub - DEAP](https://github.com/DEAP/deap)
+-   `pytorch`: Para implementaciones adicionales que requieran esta librería de aprendizaje profundo.
+    -   Repositorio: [GitHub - PyTorch](https://github.com/pytorch/pytorch)
+-   `MLflow`: Para el seguimiento y la gestión del ciclo de vida del modelo de aprendizaje automático.
+    -   Repositorio: [GitHub - MLflow](https://github.com/mlflow/mlflow)
+
+### Conjuntos de Datos
+
+1.  **Madelon**
+    -   Fuente: [UCI Repository](https://archive.ics.uci.edu/ml/datasets/Madelon)
+2.  **Leukemia**
+    -   Fuente: Artículo @golubMolecularClassificationCancer1999. El conjunto de datos puede encontrarse en varios repositorios de investigación en biología computacional.
+3.  **GCM**
+    -   Fuente: Artículo @ramaswamyMulticlassCancerDiagnosis2001. Disponible en repositorios de biología computacional.
+4.  **Gisette**
+    -   Fuente: [UCI Repository](https://archive.ics.uci.edu/ml/datasets/Gisette)
+
+> **Nota**: Se plantea la posibilidad de introducir nuevos conjuntos de datos en función de los resultados obtenidos.
+
+### Arquitecturas
+
+1.  **Configuración Clásica**
+    -   Algoritmo Genético (`DEAP`)
+    -   Modelo de Bosques Aleatorios (`lightgbm`) para función objetivo
+    -   Sin aumentación de datos
+2.  **Configuración Novedosa**
+    -   Algoritmo Genético (`DEAP`)
+    -   Autoencoders Variacionales (`pytorch`)
+    -   Modelo de Bosques Aleatorios (`lightgbm`) para función objetivo
+    -   Aumentación de datos en distintas etapas del algoritmo genético
+
+## Diagrama de Gantt para el Cronograma de Trabajo
+
+![Diagrama de Gantt para el Proyecto de Tesis de Maestría](data/gantt_tesis.png)
+
+```{=html}
+<!-- 
+
+¿Qué presentar?
+• Plan de tesis
+• Compromiso y CV del director
+• CV del Tesista
+Recibe y hace una primera evaluación el Comité Académico. De tener el visto bueno se eleva para su evaluación en CS. Secciones del plan de MAGstría según normativa:
+Escribir a futuro. 
+
+Extensión máxima recomendada: 8 páginas.
+
+Título
+• Debe expresar claramente el tema con rigurosidad y precisión técnica.
+
+Fundamentación y justificación del tema (extensión máxima 2 páginas)
+• Marco teórico.
+• Valor científico del trabajo propuesto.
+• Alcance.
+
+Estado del arte (extensión máxima sugerida 2 páginas)
+• Evolución histórica y actual del conocimiento.
+• Aspectos o conocimiento que se encuentre vacantes. 
+- Citar a mis directores!
+
+Objetivos (extensión máxima sugerida 1 páginas) Preferentemente 1⁄2 página
+• Enunciado claro de los objetivos que den fe de los alcances y límites.
+• OG → línea de investigación
+• OE → resultados esperados
+
+Metodología y Actividades (extensión máxima sugerida 2 páginas) Lo que necesiten
+- Seleccion de datos, como se prepararon los datos, estructura de los datos y Evaluación
+- Implementación
+• Actividades de desarrollar
+• Metodologías técnicas.
+Acá agregar cuestiones éticas en caso que utilicen datos de humanos (cómo los anonimizan, etc.).
+
+Cronograma de trabajo (extensión máxima sugerida 2 páginas) → Preferentemente 1⁄2 o 1 página.
+• Listar actividades con un diagrama de Gantt
+
+Referencias bibliográficas (extensión máxima sugerida 2 páginas)→ Unas 20-25 como máximo.
+• Actualizadas y pertinentes
+• Elegir y respetar estilo (APA o IEEE)
+
+Condiciones para el desarrollo (extensión máxima sugerida 1 páginas) → 1⁄2 página
+• Mencionar y justificar la sede en la que se trabajará
+• Equipamiento
+• Software
+
+-->
+```
+\pagebreak
+
+### Bibliografía
